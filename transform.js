@@ -53,7 +53,7 @@ function transform_rotatelocal(transform, theta) {
 
 /* scales about origin */
 function transform_scale(transform, vec3) {
-    transform.mat = mat3_multiplymat3(mat3_new(
+    transform.mat = mat4_multiplymat4(mat4_new(
         vec3.x, 0,      0,      0,
         0,      vec3.y, 0,      0,
         0,      0,      vec3.z, 0,

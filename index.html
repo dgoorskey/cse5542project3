@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>demo</title>
+       <title>demo</title>
 
         <link rel="stylesheet" href="style.css">
 
@@ -9,26 +9,33 @@
             attribute vec3 va_position;
             uniform vec2 vu_canvassize; // w h, size of canvas
             uniform mat4 vu_transform;
+            uniform mat4 vu_projection;
 
             void main(void) {
-                //gl_Position = vec4(va_position + (vu_canvassize * vec2(-0.5, -0.5)), 0, 1);
-                //gl_Position /= vec4(vu_canvassize, 1, 1); // scale to clip range
-                //gl_Position *= vec4(2, 2, 1, 1); // canvassize
-                //gl_Position *= vec4(1, -1, 1, 1); // flip y coordinate system for sanity
-
-                //vec2 pos = va_position + (vu_canvassize * vec2(-0.5, -0.5));
-                //pos /= vu_canvassize; // scale to clip range
-                //pos *= vec2(2, 2); // canvassize
-                //pos *= vec2(1, -1); // flip y coordinate system for sanity
-                //gl_Position = vec4((vu_transform * vec3(pos, 1)).xy, 0, 1);
-
                 vec4 pos = vec4(va_position, 1); // pos is in world coordinates (intended to be equivalent to pixel coordinates)
-                //pos = vec4(vu_transform * vec3(pos.xyz), 0, 1);        // this doesn't work (z = 0)
-                //pos = vec4((vu_transform * vec3(pos.xy, 1)).xy, 0, 1); // this does (z = 1)
-                pos = vec4((vu_transform * vec4(pos.xyz, 1)).xyz, 1); // apply transform in world coordinate space
-                pos.xy += vu_canvassize * vec2(-0.5, -0.5); // translate world coordinates so the center of the screen is (0, 0). (e.g. x=400 on an 800px wide screen is now x=0)
+
+                // [ n/r 0   0            0
+                //   0   n/t 0            0
+                //   0   0   -(f+n)/(f-n) -2fn/(f-n)
+                //   0   0   -1           1          ]
+                //
+                // n: near plane distance (positive)
+                // f: far plane distance (positive)
+                // n: cot( fov_y / 2 )
+                // (see http://www.songho.ca/opengl/gl_projectionmatrix.html)
+
+                //pos = vec4((vu_transform * vec4(pos.xyz, 1)).xyz, 1); // apply transform in world coordinate space
+                pos = vu_transform * pos;
+                //pos.xy += vu_canvassize * vec2(-0.5, -0.5); // translate world coordinates so the center of the screen is (0, 0). (e.g. x=400 on an 800px wide screen is now x=0)
                 pos.xy /= vu_canvassize * vec2(0.5, 0.5);   // scale coordinates to map everything to [-1, 1]. (e.g. x=0 on an 800px wide screen is now x=-1, whereas x=800 is now x=1)
-                pos.y *= -1.0; // flip the y coordinate system for sanity
+                //pos.y *= -1.0; // flip the y coordinate system for sanity
+                pos.z *= -1.0; // flip the z coordinate system for sanity
+
+                // perspective divide
+                // see https://webglfundamentals.org/webgl/lessons/webgl-3d-perspective.html
+                pos.z /= 200.0;
+                pos.w = pos.z * 1.0 + 1.0; // opengl automatically normalizes gl_Position wrt w
+
                 gl_Position = pos;
 
                 gl_PointSize = 3.0;

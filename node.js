@@ -13,8 +13,27 @@ class Node {
 }
 
 class Camera extends Node {
-    constructor(transform) {
+    constructor(transform, fov, aspect, near, far) {
         super(transform);
+
+        // see https://webglfundamentals.org/webgl/lessons/webgl-3d-perspective.html
+        // see https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#perspective_projection_matrix
+        /*
+        let f = Math.tan((Math.PI * 0.5) - (0.5 * fov));
+        let r = 1.0 / (near - far);
+        this.projection = mat4_new(
+            f/aspect, 0, 0,            0,
+            0,        f, 0,            0,
+            0,        0, (near+far)*r, 2*near*far*r,
+            0,        0, -1,           0
+        );
+        */
+        this.projection = mat4_new(
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 1.0,
+            0, 0, 0, 1
+        )
     }
 }
 
@@ -43,6 +62,10 @@ class Mesh extends Node {
 
 class CubeMesh extends Mesh {
     constructor(gl, vec3_position, vec3_size, color) {
+        let transform = transform_new();
+        transform = transform_scale(transform, vec3_size);
+        transform = transform_translate(transform, vec3_position);
+
         // a-----b      (+y)
         // |\   /|\      |
         // | \ / | \     |
@@ -62,25 +85,25 @@ class CubeMesh extends Mesh {
         let g = vec3_new(-1, -1, 1);
         let h = vec3_new(1,  -1, 1);
 
-        super(gl, transform_new(), [
+        super(gl, transform, [
             // top face
-            a, b, c,
-            d, c, b,
+            a, c, b,
+            d, b, c,
             // bottom face
             e, f, g,
             h, g, f,
             // left (-x) face
-            a, c, e,
-            g, e, c,
+            a, e, c,
+            g, c, e,
             // right (+x) face
-            d, b, h,
-            f, h, b,
+            d, h, b,
+            f, b, h,
             // back (-z) face
-            b, a, f,
-            e, f, a,
-            // right (+z) face
-            c, d, g,
-            h, g, d,
+            b, f, a,
+            e, a, f,
+            // front (+z) face
+            c, g, d,
+            h, d, g,
         ], color);
     }
 }

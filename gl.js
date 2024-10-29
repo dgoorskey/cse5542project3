@@ -77,13 +77,17 @@ function gl_resize(gl) {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 }
 
-/* writes an transform to a uniform */
-function gl_uniform_transform(gl, uniform, transform) {
-    let mat = transform.mat;
+function gl_uniform_mat4(gl, uniform, mat4) {
     gl.uniformMatrix4fv(uniform, false, [
-        mat.a, mat.e, mat.i, mat.m, // column-major order
-        mat.b, mat.f, mat.j, mat.n,
-        mat.c, mat.g, mat.k, mat.o,
-        mat.d, mat.h, mat.l, mat.p,
+        mat4.a, mat4.e, mat4.i, mat4.m, // column-major order
+        mat4.b, mat4.f, mat4.j, mat4.n,
+        mat4.c, mat4.g, mat4.k, mat4.o,
+        mat4.d, mat4.h, mat4.l, mat4.p,
     ]);
 }
+
+/* writes an transform to a uniform */
+function gl_uniform_transform(gl, uniform, transform) {
+    gl_uniform_mat4(gl, uniform, transform.mat);
+}
+

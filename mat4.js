@@ -32,7 +32,7 @@ function mat4_new(
      e f g h   *   e f g h
      i j k l       i j k l
      m n o p ]     m n o p ] */
-function mat4_multiplymat3(lmat4, rmat4) {
+function mat4_multiplymat4(lmat4, rmat4) {
     let a = (lmat4.a * rmat4.a) + (lmat4.b * rmat4.e) + (lmat4.c * rmat4.i) + (lmat4.d * rmat4.m);
     let b = (lmat4.a * rmat4.b) + (lmat4.b * rmat4.f) + (lmat4.c * rmat4.j) + (lmat4.d * rmat4.n);
     let c = (lmat4.a * rmat4.c) + (lmat4.b * rmat4.g) + (lmat4.c * rmat4.k) + (lmat4.d * rmat4.o);

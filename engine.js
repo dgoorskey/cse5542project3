@@ -9,28 +9,22 @@ function engine_new(htmlid_canvas, htmlid_vshader, htmlid_fshader) {
     let program = gl_program_new(gl, fshader, vshader);
     gl.useProgram(program);
 
-    let program_va_position = gl.getAttribLocation(program, "va_position");
-    let program_vu_canvassize = gl.getUniformLocation(program, "vu_canvassize");
-    let program_vu_transform = gl.getUniformLocation(program, "vu_transform");
-    let program_fu_color = gl.getUniformLocation(program, "fu_color");
-    //console.log("va_position " + program_va_position);
-    //console.log("vu_canvassize " + program_vu_canvassize);
-    //console.log("vu_transform " + program_vu_transform);
-    //console.log("fu_color " + program_fu_color);
-
     let shadervars = {
-        va_position:   program_va_position,
-        vu_canvassize: program_vu_canvassize,
-        vu_transform:      program_vu_transform,
-        fu_color:      program_fu_color,
+        va_position:   gl.getAttribLocation(program,  "va_position"),
+        vu_canvassize: gl.getUniformLocation(program, "vu_canvassize"),
+        vu_transform:  gl.getUniformLocation(program, "vu_transform"),
+        vu_projection: gl.getUniformLocation(program, "vu_projection"),
+        fu_color:      gl.getUniformLocation(program, "fu_color"),
     };
 
     let root = new Node(transform_new()); // empty node as root of entire scene tree
 
+    let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+
     return {
         gl: gl,
         shadervars: shadervars,
-        camera: new Camera(transform_new()),
+        camera: new Camera(transform_new(), Math.PI * 0.5, aspect, 1, 2000),
         nodes: [], // all nodes in scene tree (i don't wanna do recursion waaaaaaa :sob: )
     };
 }
@@ -42,18 +36,40 @@ function engine_run(engine) {
     /* set up world */
     /* ============ */
     engine.nodes.push(new Node(transform_new()));
-    engine.nodes.push(new CubeMesh(engine.gl, vec3_new(0, 0, 0), vec3_new(1, 1, 1), color_new(1.0, 0.0, 0.0, 1.0)));
+    engine.nodes.push(new CubeMesh(engine.gl, vec3_new(100, -100, 90), vec3_new(10, 10, 10), color_new(0.0, 0.5, 0.8, 1.0)));
+
     engine.nodes.push(new Mesh(
         engine.gl,
-        transform_new(),
+        transform_translate(transform_new(), vec3_new(0, 0, 50)),
         [
             vec3_new(0, 0, 0),
             vec3_new(100, 0, 0),
             vec3_new(100, 100, 0),
         ],
-        color_new(1.0, 0.0, 0.0, 1.0)
+        color_new(1.0, 0.3, 0.3, 1.0)
     ));
-    // TODO: push camera
+    engine.nodes.push(new Mesh(
+        engine.gl,
+        transform_translate(transform_new(), vec3_new(-200, 400, -200)),
+        [
+            vec3_new(0, 0, 0),
+            vec3_new(0, 0, -100),
+            vec3_new(0, 400, 0),
+
+            vec3_new(0, 400, -110),
+            vec3_new(0, 400, -10),
+            vec3_new(0, 0, -110),
+
+            vec3_new(-400, 0, 0),
+            vec3_new(0, 0, 0),
+            vec3_new(-400, 400, 0),
+
+            vec3_new(-400, 0, -100),
+            vec3_new(0, 0, -100),
+            vec3_new(-400, 0, 0),
+        ],
+        color_new(1.0, 0.3, 0.3, 1.0)
+    ));
 
     // start draw loop
     requestAnimationFrame((delta) => engine_draw(engine, delta));
@@ -66,6 +82,9 @@ function engine_draw(engine, delta) {
     gl_resize(gl);
     gl.clearColor(0.8, 0.9, 1.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
 
     for (let node of engine.nodes) {
         if (node instanceof Mesh) {
@@ -80,6 +99,7 @@ function engine_draw(engine, delta) {
                 node.color.g,
                 node.color.a,
             ]);
+            gl_uniform_mat4(gl, shadervars.vu_projection, engine.camera.projection);
             gl.drawArrays(gl.TRIANGLES, 0, node.vbo_length / 3);
         }
     }
