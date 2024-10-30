@@ -18,6 +18,12 @@ function transform_getposition(transform) {
     return vec3_new(testpoint.x, testpoint.y, testpoint.z);
 }
 
+/* get the basis */
+// TODO: finish
+function transform_getbasis(transform) {
+    let xtest = vec4_new(1, 0, 0, 1);
+}
+
 function transform_translate(transform, vec3) {
     transform.mat = mat4_multiplymat4(mat4_new(
         1, 0, 0, vec3.x,
@@ -30,24 +36,36 @@ function transform_translate(transform, vec3) {
 
 
 /* rotates about origin by theta radians */
-// TODO: use axis-angle rotation
-function transform_rotate(transform, theta) {
-    let result = transform_new();
-    result.mat = mat3_multiplymat3(mat3_new(
-        Math.cos(theta), -Math.sin(theta), 0,
-        Math.sin(theta), Math.cos(theta),  0,
-        0,               0,                1
+function transform_rotate(transform, vec3_axis, theta) {
+    let c = Math.cos(theta);
+    let s = Math.sin(theta);
+    let t = 1 - Math.cos(theta);
+    let x = vec3_axis.x;
+    let y = vec3_axis.y;
+    let z = vec3_axis.z;
+    transform.mat = mat4_multiplymat4(mat4_new(
+        t*x*x + c,   t*x*y - z*s, t*x*z + y*s, 0,
+        t*x*y + z*s, t*y*y + c,   t*y*z - x*s, 0,
+        t*x*z - y*s, t*y*z + x*s, t*z*z + c,   0,
+        0,           0,           0,           1
     ), transform.mat);
-    return result;
+    return transform;
 }
 
 /* rotate about center by theta radians */
-// TODO: use axis-angle rotation
-function transform_rotatelocal(transform, theta) {
-    let offset = transform_getposition(transform);
-    transform = transform_translate(transform, vec2_scale(offset, -1)); // translate to origin
-    transform = transform_rotate(transform, theta);
-    transform = transform_translate(transform, offset); // translate to original position
+function transform_rotatelocal(transform, vec3_axis, theta) {
+    let c = Math.cos(theta);
+    let s = Math.sin(theta);
+    let t = 1 - Math.cos(theta);
+    let x = vec3_axis.x;
+    let y = vec3_axis.y;
+    let z = vec3_axis.z;
+    transform.mat = mat4_multiplymat4(transform.mat, mat4_new(
+        t*x*x + c,   t*x*y - z*s, t*x*z + y*s, 0,
+        t*x*y + z*s, t*y*y + c,   t*y*z - x*s, 0,
+        t*x*z - y*s, t*y*z + x*s, t*z*z + c,   0,
+        0,           0,           0,           1
+    ));
     return transform;
 }
 

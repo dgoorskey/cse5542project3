@@ -1,8 +1,9 @@
 class Node {
-    constructor(transform) {
+    constructor(transform, updatecallback) {
         this.transform = transform;
         this.parent = null; // null or a Node
         //this.children = []; // Node array
+        this.updatecallback = updatecallback;
     }
 
     add_child(node) {
@@ -10,11 +11,26 @@ class Node {
         //this.children.push(node);
         // TODO: error if cycle
     }
+
+    get_global_transform() {
+        let result = transform_new();
+        let node = this;
+        while (node != null) {
+            result.mat = mat4_multiplymat4(node.transform.mat, result.mat);
+            node = node.parent;
+        }
+        return result;
+    }
+
+    update(delta) {
+        let f = this.updatecallback; //(this, delta);
+        f(this, delta);
+    }
 }
 
 class Camera extends Node {
-    constructor(transform, fov, aspect, near, far) {
-        super(transform);
+    constructor(transform, fov, aspect, near, far, updatecallback) {
+        super(transform, updatecallback);
 
         // see https://webglfundamentals.org/webgl/lessons/webgl-3d-perspective.html
         // see https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#perspective_projection_matrix
@@ -40,8 +56,8 @@ class Camera extends Node {
 class Mesh extends Node {
     /* vec3_vertices is an array of vec3, each representing a vertex.
      * every 3 vertices becomes a triangle. */
-    constructor(gl, transform, vec3_vertices, color) {
-        super(transform);
+    constructor(gl, transform, vec3_vertices, color, updatecallback) {
+        super(transform, updatecallback);
         this.color = color;
         this.vbo = gl.createBuffer();
         this.vbo_length = vec3_vertices.length * 3;
@@ -61,7 +77,7 @@ class Mesh extends Node {
 }
 
 class CubeMesh extends Mesh {
-    constructor(gl, vec3_position, vec3_size, color) {
+    constructor(gl, vec3_position, vec3_size, color, updatecallback) {
         let transform = transform_new();
         transform = transform_scale(transform, vec3_size);
         transform = transform_translate(transform, vec3_position);
@@ -104,7 +120,7 @@ class CubeMesh extends Mesh {
             // front (+z) face
             c, g, d,
             h, d, g,
-        ], color);
+        ], color, updatecallback);
     }
 }
 

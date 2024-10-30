@@ -34,7 +34,7 @@
                 // perspective divide
                 // see https://webglfundamentals.org/webgl/lessons/webgl-3d-perspective.html
                 pos.z /= 200.0;
-                pos.w = pos.z * 1.0 + 1.0; // opengl automatically normalizes gl_Position wrt w
+                pos.w = pos.z * 1.0 + 1.01; // opengl automatically normalizes gl_Position wrt w
 
                 gl_Position = pos;
 
@@ -53,6 +53,8 @@
         <script src="color.js"></script>
         <script src="vec3.js"></script>
         <script src="vec4.js"></script>
+        <script src="mat2.js"></script>
+        <script src="mat3.js"></script>
         <script src="mat4.js"></script>
         <script src="transform.js"></script>
         <script src="node.js"></script>
@@ -60,13 +62,33 @@
         <script src="engine.js"></script>
 
         <script>
+            let mat3 = mat3_new(
+                3, 0, 2,
+                2, 0, -2,
+                0, 1, 1
+            );
+            console.log(mat3);
+            console.log(mat3_inverse(mat3));
+            let mat4 = mat4_new(
+                1, 2, 5, 3,
+                2, 2, 4, 4,
+                3, 4, 5, 6,
+                0, 0, 0, 1
+            );
+            console.log(mat4);
+            console.log(mat4_inverse(mat4));
+        </script>
+
+        <script>
+            /*
             function main() {
                 let engine = engine_new("canvas", "vertexshader", "fragmentshader");
                 engine_run(engine);
             }
+            */
         </script>
     </head>
-    <body onload="main();">
+    <body onload="">
         <canvas id="canvas" tabindex="0" autofocus></canvas>
     </body>
 </html>
