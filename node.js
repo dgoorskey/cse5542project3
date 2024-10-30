@@ -10,6 +10,7 @@ class Node {
         node.parent = this;
         //this.children.push(node);
         // TODO: error if cycle
+        return node; // ergonomics
     }
 
     get_global_transform() {

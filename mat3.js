@@ -119,7 +119,7 @@ function mat3_determinant(mat3) {
     let result = mat3.a*(mat3.e*mat3.i - mat3.f*mat3.h)
     - mat3.b*(mat3.d*mat3.i - mat3.f*mat3.g)
     + mat3.c*(mat3.d*mat3.h - mat3.e*mat3.g);
-    console.log("mat3 determinant = " + result);
+    //console.log("mat3 determinant = " + result);
     return result;
 }
 

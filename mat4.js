@@ -89,9 +89,9 @@ function mat4_multiplyvec4(lmat4, rvec4) {
 /* given a row and column, returns a mat3 composed of
  * everything not in that row or column. */
 function mat4_submat3(mat4, row, col) {
-    console.log(row);
+    //console.log(row);
     console.assert((row >= 0 && row < 4), "row out of range");
-    console.log(col);
+    //console.log(col);
     console.assert((col >= 0 && col < 4), "col out of range");
 
     // remove row
@@ -223,7 +223,7 @@ function mat4_inverse(mat4) {
     let cofactors = mat4_cofactors(minors);
     let adjugate = mat4_transpose(cofactors);
     let determinant = mat4_determinant(mat4);
-    console.log(determinant);
+    //console.log(determinant);
     let result = mat4_multiplyfloat(adjugate, 1/determinant);
     return result;
 }

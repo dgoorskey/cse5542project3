@@ -14,7 +14,7 @@ function transform_new() {
 /* get the offset from origin */
 function transform_getposition(transform) {
     let testpoint = vec4_new(0, 0, 0, 1);
-    testpoint = mat4_multiplyvec4(transform, testpoint);
+    testpoint = mat4_multiplyvec4(transform.mat, testpoint);
     return vec3_new(testpoint.x, testpoint.y, testpoint.z);
 }
 
