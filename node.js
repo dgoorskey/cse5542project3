@@ -79,9 +79,7 @@ class Mesh extends Node {
 
 class CubeMesh extends Mesh {
     constructor(gl, vec3_position, vec3_size, color, updatecallback) {
-        let transform = transform_new();
-        transform = transform_scale(transform, vec3_size);
-        transform = transform_translate(transform, vec3_position);
+        let transform = transform_translate(transform_new(), vec3_position);
 
         // a-----b      (+y)
         // |\   /|\      |
@@ -93,14 +91,14 @@ class CubeMesh extends Mesh {
         //   \|/   \|      \
         //    g-----h      (+z)
         // c-e, d-g, b-h, and a-f are also edges
-        let a = vec3_new(-1, 1,  -1);
-        let b = vec3_new(1,  1,  -1);
-        let c = vec3_new(-1, 1,  1);
-        let d = vec3_new(1,  1,  1);
-        let e = vec3_new(-1, -1, -1);
-        let f = vec3_new(1,  -1, -1);
-        let g = vec3_new(-1, -1, 1);
-        let h = vec3_new(1,  -1, 1);
+        let a = vec3_new(-vec3_size.x/2, vec3_size.y/2,  -vec3_size.z/2);
+        let b = vec3_new(vec3_size.x/2,  vec3_size.y/2,  -vec3_size.z/2);
+        let c = vec3_new(-vec3_size.x/2, vec3_size.y/2,  vec3_size.z/2);
+        let d = vec3_new(vec3_size.x/2,  vec3_size.y/2,  vec3_size.z/2);
+        let e = vec3_new(-vec3_size.x/2, -vec3_size.y/2, -vec3_size.z/2);
+        let f = vec3_new(vec3_size.x/2,  -vec3_size.y/2, -vec3_size.z/2);
+        let g = vec3_new(-vec3_size.x/2, -vec3_size.y/2, vec3_size.z/2);
+        let h = vec3_new(vec3_size.x/2,  -vec3_size.y/2, vec3_size.z/2);
 
         super(gl, transform, [
             // top face
@@ -122,6 +120,248 @@ class CubeMesh extends Mesh {
             c, g, d,
             h, d, g,
         ], color, updatecallback);
+    }
+}
+
+class CylinderMesh extends Mesh {
+    constructor(gl, vec3_position, height, bottomradius, topradius, stacks, slices, color, updatecallback) {
+        let transform = transform_translate(transform_new(), vec3_position);
+
+        // given cylinder params and a ring and column idx, calculates and returns that vertex.
+        let vertex = (height, bottomradius, topradius, stacks, slices, ringidx, columnidx) => {
+            // # rings = # stacks + 1
+            // e.g. 2 stacks makes 3 rings
+            // same for slices and columns
+            let stackheight = height/stacks;
+            let y = ringidx*stackheight - height/2; // y position of ring
+            let radiusslope = (topradius - bottomradius) / height; // rise over run
+            let radius = (y+height/2)*radiusslope + bottomradius;
+
+            let sliceangle = Math.PI * 2 / slices;
+            let theta = columnidx * sliceangle;
+
+            let x = Math.sin(theta) * radius;
+            let z = Math.cos(theta) * radius;
+            return vec3_new(x, y, z);
+        }
+
+        let vertices = [];
+        // a---b---c---d...
+        // |  /|  /|  /|
+        // | / | / | / |
+        // |/  |/  |/  |
+        // e---f---g---h...
+        // triangles: aeb, fbe, bfc, gcf, cgd, hdg, etc.
+        for (let stackidx = 0; stackidx < stacks; stackidx++) {
+            for (let sliceidx = 0; sliceidx < slices; sliceidx++) {
+                // we do one square at a time, from the bottom to the top
+                // .   .
+                // .   .
+                // .   .
+                // a---b...
+                // |  /|
+                // | / |
+                // |/  |
+                // c---d...
+                let a = vertex(height, bottomradius, topradius, stacks, slices, stackidx+1, sliceidx);
+                let b = vertex(height, bottomradius, topradius, stacks, slices, stackidx+1, sliceidx+1);
+                let c = vertex(height, bottomradius, topradius, stacks, slices, stackidx, sliceidx);
+                let d = vertex(height, bottomradius, topradius, stacks, slices, stackidx, sliceidx+1);
+                vertices.push(a);
+                vertices.push(c);
+                vertices.push(b);
+                vertices.push(d);
+                vertices.push(b);
+                vertices.push(c);
+            }
+        }
+
+        // create the top and bottom circles
+        // bottom face, looking up (+y is towards screen):
+        //   b---c
+        //  / \ / \
+        // a---x---d
+        //  \ / \ /
+        //   f---e
+        // triangles: axb, bxc, cxd, dxe, exf, ...
+        for (let sliceidx = 0; sliceidx < slices; sliceidx++) {
+            let sliceangle = Math.PI * 2 / slices;
+            let a_theta = sliceidx     * sliceangle;
+            let b_theta = (sliceidx+1) * sliceangle;
+            let a = vec3_new(
+                Math.sin(a_theta) * bottomradius,
+                -height/2,
+                Math.cos(a_theta) * bottomradius,
+            );
+            let b = vec3_new(
+                Math.sin(b_theta) * bottomradius,
+                -height/2,
+                Math.cos(b_theta) * bottomradius,
+            );
+            let x = vec3_new(
+                0,
+                -height/2,
+                0
+            );
+            vertices.push(a);
+            vertices.push(x);
+            vertices.push(b);
+        }
+        // top face, looking down (+y is towards you):
+        //   f---e
+        //  / \ / \
+        // a---x---d
+        //  \ / \ /
+        //   b---c
+        // triangles: bxa, cxb, dxc, exd, fxe, ...
+        for (let sliceidx = 0; sliceidx < slices; sliceidx++) {
+            let sliceangle = Math.PI * 2 / slices;
+            let a_theta = sliceidx     * sliceangle;
+            let b_theta = (sliceidx+1) * sliceangle;
+            let a = vec3_new(
+                Math.sin(a_theta) * topradius,
+                height/2,
+                Math.cos(a_theta) * topradius,
+            );
+            let b = vec3_new(
+                Math.sin(b_theta) * topradius,
+                height/2,
+                Math.cos(b_theta) * topradius,
+            );
+            let x = vec3_new(
+                0,
+                height/2,
+                0
+            );
+            vertices.push(b);
+            vertices.push(x);
+            vertices.push(a);
+        }
+
+        super(gl, transform, vertices, color, updatecallback);
+    }
+}
+
+class SphereMesh extends Mesh {
+    constructor(gl, vec3_position, radius, stacks, slices, color, updatecallback) {
+        let transform = transform_translate(transform_new(), vec3_position);
+
+        // given sphere params and a ring and column idx, calculates and returns that vertex.
+        // 0 < ringidx < stacks
+        let vertex = (radius, stacks, slices, ringidx, columnidx) => {
+            // # rings = # stacks - 1 (zenith and nadir don't count as rings)
+            // e.g. 2 stacks makes 3 rings
+            // # columns = # slices + 1
+            // e.g. 8 slices makes 9 columns
+            let stackangle = Math.PI / stacks;
+            let ringtheta = ringidx*stackangle; // angle from nadir
+            let ringradius = Math.sin(ringtheta) * radius;
+            let y = Math.cos(ringtheta) * radius;
+            let sliceangle = Math.PI * 2 / slices;
+            let theta = columnidx*sliceangle;
+            let x = Math.sin(theta) * ringradius;
+            let z = Math.cos(theta) * ringradius;
+            return vec3_new(x, y, z);
+        }
+
+        let vertices = [];
+
+        // a---b---c---d...
+        // |  /|  /|  /|
+        // | / | / | / |
+        // |/  |/  |/  |
+        // e---f---g---h...
+        // triangles: aeb, fbe, bfc, gcf, cgd, hdg, etc.
+        for (let stackidx = 1; stackidx < stacks; stackidx++) {
+            for (let sliceidx = 0; sliceidx < slices; sliceidx++) {
+                // we do one square at a time, from the bottom to the top
+                // .   .
+                // .   .
+                // .   .
+                // a---b...
+                // |  /|
+                // | / |
+                // |/  |
+                // c---d...
+                let a = vertex(radius, stacks, slices, stackidx+1, sliceidx+1);
+                let b = vertex(radius, stacks, slices, stackidx+1, sliceidx);
+                let c = vertex(radius, stacks, slices, stackidx, sliceidx+1);
+                let d = vertex(radius, stacks, slices, stackidx, sliceidx);
+                vertices.push(a);
+                vertices.push(c);
+                vertices.push(b);
+                vertices.push(d);
+                vertices.push(b);
+                vertices.push(c);
+            }
+        }
+
+        // create the top and bottom stacks (endcaps)
+        let stackangle = Math.PI / stacks;
+        let ringradius = Math.sin(stackangle) * radius;
+        let ringheightfromcenter = Math.cos(stackangle) * radius;
+        // bottom face, looking up (+y is towards screen):
+        //   b---c
+        //  / \ / \
+        // a---x---d
+        //  \ / \ /
+        //   f---e
+        // triangles: axb, bxc, cxd, dxe, exf, ...
+        for (let sliceidx = 0; sliceidx < slices; sliceidx++) {
+            let sliceangle = Math.PI * 2 / slices;
+            let a_theta = sliceidx     * sliceangle;
+            let b_theta = (sliceidx+1) * sliceangle;
+            let a = vec3_new(
+                Math.sin(a_theta) * ringradius,
+                -ringheightfromcenter,
+                Math.cos(a_theta) * ringradius,
+            );
+            let b = vec3_new(
+                Math.sin(b_theta) * ringradius,
+                -ringheightfromcenter,
+                Math.cos(b_theta) * ringradius,
+            );
+            let x = vec3_new(
+                0,
+                -radius,
+                0
+            );
+            vertices.push(a);
+            vertices.push(x);
+            vertices.push(b);
+        }
+        // top face, looking down (+y is towards you):
+        //   f---e
+        //  / \ / \
+        // a---x---d
+        //  \ / \ /
+        //   b---c
+        // triangles: bxa, cxb, dxc, exd, fxe, ...
+        for (let sliceidx = 0; sliceidx < slices; sliceidx++) {
+            let sliceangle = Math.PI * 2 / slices;
+            let a_theta = sliceidx     * sliceangle;
+            let b_theta = (sliceidx+1) * sliceangle;
+            let a = vec3_new(
+                Math.sin(a_theta) * ringradius,
+                ringheightfromcenter,
+                Math.cos(a_theta) * ringradius,
+            );
+            let b = vec3_new(
+                Math.sin(b_theta) * ringradius,
+                ringheightfromcenter,
+                Math.cos(b_theta) * ringradius,
+            );
+            let x = vec3_new(
+                0,
+                radius,
+                0
+            );
+            vertices.push(b);
+            vertices.push(x);
+            vertices.push(a);
+        }
+
+        super(gl, transform, vertices, color, updatecallback);
     }
 }
 

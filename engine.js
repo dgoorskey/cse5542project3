@@ -36,12 +36,12 @@ function engine_run(engine) {
 
     // spawn camera
     let aspect = engine.gl.canvas.clientWidth / engine.gl.canvas.clientHeight;
-    let camera = new Camera(transform_translate(transform_new(), vec3_new(0, 100, 0)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
-        //console.log(transform_getposition(node.transform).y);
-        //if (transform_getposition(node.transform).y > -50) {
-
+    //let camera = new Camera(transform_translate(transform_new(), vec3_new(0, 100, 0)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
+    let camera = new Camera(
+        transform_translate(transform_new(), vec3_new(0, -100, -100)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
         // basic camera animation
         // this works somehow
+        /*
         if (engine.time < 10) {
             node.transform = transform_translate(node.transform, vec3_scale(vec3_new(0, -20, -20), delta));
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, -1, 0), Math.PI * 0.05 * delta);
@@ -50,6 +50,34 @@ function engine_run(engine) {
         } else {
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, -1, 0), Math.PI * 0.1 * delta);
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), Math.PI * 0.1 * delta);
+        }
+        */
+
+        let turnspeed = Math.PI * 0.1 * delta;
+        if (global_keys.has("p")) {
+            node.transform = transform_rotate(node.transform, vec3_new(1, 0, 0), turnspeed);
+        }
+        if (global_keys.has("P")) {
+            node.transform = transform_rotate(node.transform, vec3_new(1, 0, 0), -turnspeed);
+        }
+        if (global_keys.has("y")) {
+            node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), turnspeed);
+        }
+        if (global_keys.has("Y")) {
+            node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), -turnspeed);
+        }
+        if (global_keys.has("r")) {
+            node.transform = transform_rotate(node.transform, vec3_new(0, 0, 1), turnspeed);
+        }
+        if (global_keys.has("R")) {
+            node.transform = transform_rotate(node.transform, vec3_new(0, 0, 1), -turnspeed);
+        }
+        if (global_keys.has(" ")) {
+            if (global_keys.has("Shift")) {
+                node.transform = transform_translate(node.transform, vec3_new(0, 100 * delta, 0));
+            } else {
+                node.transform = transform_translate(node.transform, vec3_new(0, -100 * delta, 0));
+            }
         }
     });
     engine.nodes.push(camera);
@@ -65,17 +93,118 @@ function engine_run(engine) {
     // spawn a grid of cubes
     for (let x = 0; x <= 1; x += 1/20) {
         for (let z = 0; z <= 1; z += 1/20) {
-            let pos = vec3_new((x-0.5)*20*40, 0, (z-0.5)*20*40);
+            let height = 20 * Math.random();
+            let pos = vec3_new((x-0.5)*20*15, height/2 - 20, (z-0.5)*20*15);
             let col = color_new(x*0.75+0.25, 1.0, z*0.75+0.25, 1.0);
-            engine.nodes.push(new CubeMesh(engine.gl, pos, vec3_new(10, 10, 10), col, (node, delta) => {
+            let cube = new CubeMesh(engine.gl, pos, vec3_new(10, height, 10), col, (node, delta) => {
                 //node.transform = transform_translate(node.transform, vec3_new(0, Math.sin(engine.time) * delta, 0));
                 //node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0.5, 0.5), Math.PI * 0.5 * delta);
-            }));
+            });
+            engine.nodes.push(cube);
         }
     }
 
+    // make pillars
+    let pillar = (position) => {
+        for (let i = 0; i < 10; i++) {
+            let segment = new CylinderMesh(
+                engine.gl,
+                vec3_new(position.x, position.y + 50 + i*50, position.z),
+                50,
+                Math.random()*10 + 10,
+                Math.random()*10 + 10,
+                4,
+                8,
+                color_new(1.0, 0.5 + (i/20), 1.0, 1.0),
+                (node, delta) => {}
+            );
+            engine.nodes.push(segment);
+        }
+    }
+
+    for (let i = 0; i < Math.PI * 2; i += Math.PI * 2 / 16) {
+        let x = Math.sin(i) * 300;
+        let z = Math.cos(i) * 300;
+        pillar(vec3_new(x, 0, z));
+    }
+
+    // make orrery
+    let sun = new SphereMesh(
+        engine.gl,
+        vec3_new(0, 100, 0),
+        40,
+        8,
+        16,
+        color_new(1.0, 0.7, 0.5, 1.0),
+        (node, delta) => {
+            let new_y = Math.sin(engine.time * 2) * 10;
+            let delta_y = new_y - node._y;
+            node.transform = transform_translate(node.transform, vec3_new(0, delta_y, 0));
+            node._y = new_y;
+        }
+    );
+    sun._y = 0;
+    engine.nodes.push(sun);
+    // add planets
+    for (let i = 0; i < 10; i++) {
+        let planet = new SphereMesh(
+            engine.gl,
+            vec3_new(i*20 + 70, 0, 0),
+            5,
+            4,
+            8,
+            color_new(Math.random(), Math.random(), Math.random(), 1.0),
+            (node, delta) => {
+                node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
+            }
+        );
+        planet._speed = Math.PI * 0.1 * Math.random() / (i/10);
+        sun.add_child(planet);
+        engine.nodes.push(planet);
+
+        // add moons
+        let mooncount = Math.max(0, Math.floor(Math.random() * 5) - 1);
+        for (let m = 0; m < mooncount; m++) {
+            let moon = new SphereMesh(
+                engine.gl,
+                vec3_new(m*3 + 8, 0, 0),
+                2,
+                3,
+                6,
+                color_new(Math.random(), Math.random(), Math.random(), 1.0),
+                (node, delta) => {
+                    node.transfomr = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
+                }
+            );
+            moon._speed = Math.PI * 0.7 * Math.random() / (m/3);
+            planet.add_child(moon);
+            engine.nodes.push(moon);
+        }
+    }
+
+    // add player
+    let player = new CubeMesh(engine.gl, vec3_new(50, 5, 0), vec3_new(10, 10, 10), color_new(0.0, 0.5, 0.8, 1.0), (node, delta) => {
+        let movement = vec3_new(0, 0, 0);
+        let speed = 100;
+        if (global_keys.has("a")) {
+            movement.x -= 1;
+        }
+        if (global_keys.has("d")) {
+            movement.x += 1;
+        }
+        if (global_keys.has("w")) {
+            movement.z -= 1;
+        }
+        if (global_keys.has("s")) {
+            movement.z += 1;
+        }
+        node.transform = transform_translate(node.transform, vec3_scale(movement, speed * delta));
+    });
+    player.add_child(sun);
+    engine.nodes.push(player);
 
     // spawn some weird cube thing
+    /*
     let cube = new CubeMesh(engine.gl, vec3_new(50, 25, 0), vec3_new(10, 10, 10), color_new(0.0, 0.5, 0.8, 1.0), (node, delta) => {
         //node.transform = transform_translate(node.transform, vec3_scale(vec3_new(-100, 0, 0), delta));
         node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), 1 * delta);
@@ -83,12 +212,14 @@ function engine_run(engine) {
         //node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), -Math.PI * delta);
     });
     engine.nodes.push(cube);
+    */
     /*
     let childcube = new CubeMesh(engine.gl, vec3_new(3, 0, 0), vec3_new(1, 1, 1), color_new(1.0, 0.0, 1.0, 1.0), (node, delta) => {});
     cube.add_child(childcube);
     engine.nodes.push(childcube);
     */
 
+    /*
     engine.nodes.push(new Mesh(
         engine.gl,
         transform_translate(transform_new(), vec3_new(0, 0, 50)),
@@ -124,6 +255,7 @@ function engine_run(engine) {
         color_new(1.0, 0.3, 0.3, 1.0),
         (node, delta) => {}
     ));
+    */
 
     // start draw loop
     requestAnimationFrame((timestamp) => engine_draw(engine, timestamp));
@@ -164,6 +296,7 @@ function engine_draw(engine, timestamp) {
             ]);
             gl_uniform_mat4(gl, shadervars.vu_projection, engine.camera.projection);
             gl.drawArrays(gl.TRIANGLES, 0, node.vbo_length / 3);
+            //gl.drawArrays(gl.LINES, 0, node.vbo_length / 3);
         }
     }
 

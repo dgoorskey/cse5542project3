@@ -12,6 +12,8 @@
             uniform mat4 vu_cameratransform;
             uniform mat4 vu_projection;
 
+            //varying vec4 ff_color;
+
             void main(void) {
                 vec4 pos = vec4(va_position, 1); // pos is in world coordinates (intended to be equivalent to pixel coordinates)
 
@@ -40,15 +42,30 @@
                 gl_Position = pos;
 
                 gl_PointSize = 3.0;
+
+                //ff_color = vec4(pos.x, pos.y, pos.z, 1.0);
             }
         </script>
         <script id="fragmentshader" type="x-shader/x-fragment" src="fshader.glsl">
             precision mediump float; // see https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html
 
+            //varying vec4 ff_color;
+
             uniform vec4 fu_color;
             void main(void) {
                 gl_FragColor = fu_color;
+                //gl_FragColor = ff_color;
             }
+        </script>
+
+        <script>
+            let global_keys = new Set(); // set of pressed keys
+            document.addEventListener('keydown', (e) => {
+                global_keys.add(e.key);
+            });
+            document.addEventListener('keyup', (e) => {
+                global_keys.delete(e.key);
+            });
         </script>
 
         <script src="color.js"></script>
