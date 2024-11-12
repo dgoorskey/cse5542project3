@@ -7,18 +7,15 @@
 
         <script id="vertexshader" type="x-shader/x-vertex">
             attribute vec3 va_position;
-            //attribute vec3 va_normal;
+            attribute vec3 va_normal;
             uniform vec2 vu_canvassize; // w h, size of canvas
             uniform mat4 vu_transform;
             uniform mat4 vu_cameratransform;
             uniform mat4 vu_projection;
-
-            //varying vec4 ff_color;
+            varying vec4 fv_normal;
 
             void main(void) {
                 vec4 pos = vec4(va_position, 1); // pos is in world coordinates (intended to be equivalent to pixel coordinates)
-
-                //pos.y += va_normal.y * 0.0000001;
 
                 // [ n/r 0   0            0
                 //   0   n/t 0            0
@@ -46,18 +43,18 @@
 
                 gl_PointSize = 3.0;
 
-                //ff_color = vec4(pos.x, pos.y, pos.z, 1.0);
+                fv_normal = vec4(va_normal, 1.0);
             }
         </script>
         <script id="fragmentshader" type="x-shader/x-fragment" src="fshader.glsl">
             precision mediump float; // see https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html
 
-            //varying vec4 ff_color;
-
+            varying vec4 fv_normal;
             uniform vec4 fu_color;
+
             void main(void) {
-                gl_FragColor = fu_color;
-                //gl_FragColor = ff_color;
+                //gl_FragColor = fu_color;
+                gl_FragColor = fv_normal + fu_color;
             }
         </script>
 
