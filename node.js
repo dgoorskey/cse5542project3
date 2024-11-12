@@ -57,23 +57,33 @@ class Camera extends Node {
 class Mesh extends Node {
     /* vec3_vertices is an array of vec3, each representing a vertex.
      * every 3 vertices becomes a triangle. */
-    constructor(gl, transform, vec3_vertices, color, updatecallback) {
+    constructor(gl, transform, vec3_vertices, vec3_normals, color, updatecallback) {
         super(transform, updatecallback);
         this.color = color;
-        this.vbo = gl.createBuffer();
-        this.vbo_length = vec3_vertices.length * 3;
 
+        this.vbo_vertices = gl.createBuffer();
+        this.vbo_vertices_length = vec3_vertices.length * 3;
         console.assert(vec3_vertices.length % 3 == 0, "vec3_vertices.length must be a multiple of 3");
-
-        let data = new Float32Array(this.vbo_length);
+        let data = new Float32Array(this.vbo_vertices_length);
         for (let i = 0; i < vec3_vertices.length; i++) {
             data[i*3 + 0] = vec3_vertices[i].x;
             data[i*3 + 1] = vec3_vertices[i].y;
             data[i*3 + 2] = vec3_vertices[i].z;
         }
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo_vertices);
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+
+        this.vbo_normals = gl.createBuffer();
+        this.vbo_normals_length = vec3_normals.length * 3;
+        console.assert(this.vbo_normals.length == this.vbo_vertices.length, "vbo_normals.length must equal vbo_vertices.length");
+        let data2 = new Float32Array(this.vbo_normals_length);
+        for (let i = 0; i < vec3_normals.length; i++) {
+            data2[i*3 + 0] = vec3_normals[i].x;
+            data2[i*3 + 1] = vec3_normals[i].y;
+            data2[i*3 + 2] = vec3_normals[i].z;
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo_normals);
+        gl.bufferData(gl.ARRAY_BUFFER, data2, gl.STATIC_DRAW);
     }
 }
 
@@ -119,6 +129,26 @@ class CubeMesh extends Mesh {
             // front (+z) face
             c, g, d,
             h, d, g,
+        ], [
+            // top face
+            vec3_new(0, 1, 0), vec3_new(0, 1, 0), vec3_new(0, 1, 0),
+            vec3_new(0, 1, 0), vec3_new(0, 1, 0), vec3_new(0, 1, 0),
+            // bottom face,
+            vec3_new(0, -1, 0), vec3_new(0, -1, 0), vec3_new(0, -1, 0),
+            vec3_new(0, -1, 0), vec3_new(0, -1, 0), vec3_new(0, -1, 0),
+            // left (-x face)
+            vec3_new(-1, 0, 0), vec3_new(-1, 0, 0), vec3_new(-1, 0, 0),
+            vec3_new(-1, 0, 0), vec3_new(-1, 0, 0), vec3_new(-1, 0, 0),
+            // right (+x face)
+            vec3_new(1, 0, 0), vec3_new(1, 0, 0), vec3_new(1, 0, 0),
+            vec3_new(1, 0, 0), vec3_new(1, 0, 0), vec3_new(1, 0, 0),
+            // back (-z face)
+            vec3_new(0, 0, -1), vec3_new(0, 0, -1), vec3_new(0, 0, -1),
+            vec3_new(0, 0, -1), vec3_new(0, 0, -1), vec3_new(0, 0, -1),
+            // front (+z face)
+            vec3_new(0, 0, 1), vec3_new(0, 0, 1), vec3_new(0, 0, 1),
+            vec3_new(0, 0, 1), vec3_new(0, 0, 1), vec3_new(0, 0, 1),
+            vec3_new(0, 0, 1), vec3_new(0, 0, 1), vec3_new(0, 0, 1),
         ], color, updatecallback);
     }
 }
@@ -142,10 +172,21 @@ class CylinderMesh extends Mesh {
 
             let x = Math.sin(theta) * radius;
             let z = Math.cos(theta) * radius;
-            return vec3_new(x, y, z);
+            let vertex = vec3_new(x, y, z);
+
+            let nx = Math.sin(theta);
+            let nz = Math.cos(theta);
+            let normal = vec3_new(nx, 0, nz);
+
+            return [
+                vertex,
+                normal,
+            ];
         }
 
         let vertices = [];
+        let normals = [];
+
         // a---b---c---d...
         // |  /|  /|  /|
         // | / | / | / |
@@ -163,16 +204,22 @@ class CylinderMesh extends Mesh {
                 // | / |
                 // |/  |
                 // c---d...
-                let a = vertex(height, bottomradius, topradius, stacks, slices, stackidx+1, sliceidx);
-                let b = vertex(height, bottomradius, topradius, stacks, slices, stackidx+1, sliceidx+1);
-                let c = vertex(height, bottomradius, topradius, stacks, slices, stackidx, sliceidx);
-                let d = vertex(height, bottomradius, topradius, stacks, slices, stackidx, sliceidx+1);
+                let [a, na] = vertex(height, bottomradius, topradius, stacks, slices, stackidx+1, sliceidx);
+                let [b, nb] = vertex(height, bottomradius, topradius, stacks, slices, stackidx+1, sliceidx+1);
+                let [c, nc] = vertex(height, bottomradius, topradius, stacks, slices, stackidx, sliceidx);
+                let [d, nd] = vertex(height, bottomradius, topradius, stacks, slices, stackidx, sliceidx+1);
                 vertices.push(a);
                 vertices.push(c);
                 vertices.push(b);
                 vertices.push(d);
                 vertices.push(b);
                 vertices.push(c);
+                normals.push(na);
+                normals.push(nc);
+                normals.push(nb);
+                normals.push(nd);
+                normals.push(nb);
+                normals.push(nc);
             }
         }
 
@@ -206,6 +253,9 @@ class CylinderMesh extends Mesh {
             vertices.push(a);
             vertices.push(x);
             vertices.push(b);
+            normals.push(vec3_new(0, -1, 0));
+            normals.push(vec3_new(0, -1, 0));
+            normals.push(vec3_new(0, -1, 0));
         }
         // top face, looking down (+y is towards you):
         //   f---e
@@ -236,9 +286,12 @@ class CylinderMesh extends Mesh {
             vertices.push(b);
             vertices.push(x);
             vertices.push(a);
+            normals.push(vec3_new(0, 1, 0));
+            normals.push(vec3_new(0, 1, 0));
+            normals.push(vec3_new(0, 1, 0));
         }
 
-        super(gl, transform, vertices, color, updatecallback);
+        super(gl, transform, vertices, normals, color, updatecallback);
     }
 }
 
@@ -265,6 +318,7 @@ class SphereMesh extends Mesh {
         }
 
         let vertices = [];
+        let normals = [];
 
         // a---b---c---d...
         // |  /|  /|  /|
@@ -361,7 +415,15 @@ class SphereMesh extends Mesh {
             vertices.push(a);
         }
 
-        super(gl, transform, vertices, color, updatecallback);
+        for (let v of vertices) {
+            normals.push(vec3_new(
+                v.x / radius,
+                v.y / radius,
+                v.z / radius,
+            ));
+        }
+
+        super(gl, transform, vertices, normals, color, updatecallback);
     }
 }
 

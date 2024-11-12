@@ -7,6 +7,7 @@
 
         <script id="vertexshader" type="x-shader/x-vertex">
             attribute vec3 va_position;
+            //attribute vec3 va_normal;
             uniform vec2 vu_canvassize; // w h, size of canvas
             uniform mat4 vu_transform;
             uniform mat4 vu_cameratransform;
@@ -16,6 +17,8 @@
 
             void main(void) {
                 vec4 pos = vec4(va_position, 1); // pos is in world coordinates (intended to be equivalent to pixel coordinates)
+
+                //pos.y += va_normal.y * 0.0000001;
 
                 // [ n/r 0   0            0
                 //   0   n/t 0            0

@@ -11,6 +11,7 @@ function engine_new(htmlid_canvas, htmlid_vshader, htmlid_fshader) {
 
     let shadervars = {
         va_position:        gl.getAttribLocation(program,  "va_position"),
+        //va_normal:          gl.getAttribLocation(program,  "va_normal"),
         vu_canvassize:      gl.getUniformLocation(program, "vu_canvassize"),
         vu_transform:       gl.getUniformLocation(program, "vu_transform"),
         vu_cameratransform: gl.getUniformLocation(program, "vu_cameratransform"),
@@ -281,12 +282,18 @@ function engine_draw(engine, timestamp) {
 
     for (let node of engine.nodes) {
         if (node instanceof Mesh) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, node.vbo);
+            // vertices
+            gl.bindBuffer(gl.ARRAY_BUFFER, node.vbo_vertices);
             gl.enableVertexAttribArray(shadervars.va_position);
             gl.vertexAttribPointer(shadervars.va_position, 3, gl.FLOAT, false, 0, 0);
-            gl.uniform2fv(shadervars.vu_canvassize, [gl.canvas.width, gl.canvas.height]);
-            gl_uniform_transform(gl, shadervars.vu_transform, node.get_global_transform());
-            gl_uniform_transform(gl, shadervars.vu_cameratransform, engine.camera.get_global_transform());
+            // normals
+            gl.bindBuffer(gl.ARRAY_BUFFER, node.vbo_normals);
+            gl.enableVertexAttribArray(shadervars.va_normal);
+            gl.vertexAttribPointer(shadervars.va_normal, 3, gl.FLOAT, false, 0, 0);
+            // other vars
+            //gl.uniform2fv(shadervars.vu_canvassize, [gl.canvas.width, gl.canvas.height]);
+            //gl_uniform_transform(gl, shadervars.vu_transform, node.get_global_transform());
+            //gl_uniform_transform(gl, shadervars.vu_cameratransform, engine.camera.get_global_transform());
             //gl_uniform_mat4(gl, shadervars.vu_cameratransform, mat4_inverse(engine.camera.get_global_transform()));
             gl.uniform4fv(shadervars.fu_color, [
                 node.color.r,
