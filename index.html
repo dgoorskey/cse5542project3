@@ -30,20 +30,17 @@
                 // n: cot( fov_y / 2 )
                 // (see http://www.songho.ca/opengl/gl_projectionmatrix.html)
 
-                //pos = vec4((vu_transform * vec4(pos.xyz, 1)).xyz, 1); // apply transform in world coordinate space
-
                 vec4 worldposition = vu_transform * pos;
 
                 pos = vu_cameratransform * worldposition;
-                //pos.xy += vu_canvassize * vec2(-0.5, -0.5); // translate world coordinates so the center of the screen is (0, 0). (e.g. x=400 on an 800px wide screen is now x=0)
                 pos.xy /= vu_canvassize * vec2(0.5, 0.5);   // scale coordinates to map everything to [-1, 1]. (e.g. x=0 on an 800px wide screen is now x=-1, whereas x=800 is now x=1)
-                //pos.y *= -1.0; // flip the y coordinate system for sanity
                 pos.z *= -1.0; // flip the z coordinate system for sanity
 
                 // perspective divide
                 // see https://webglfundamentals.org/webgl/lessons/webgl-3d-perspective.html
                 pos.z /= 200.0;
                 pos.w = pos.z * 1.0 + 0.01; // opengl automatically normalizes gl_Position wrt w
+                //pos = worldposition * vu_projection;
 
                 gl_Position = pos;
                 fv_position = worldposition.xyz;
