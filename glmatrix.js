@@ -1,8 +1,8 @@
 // glMatrix v0.9.5
-glMatrixArrayType = typeof Float32Array != "undefined" ? Float32Array : typeof WebGLFloatArray != "undefined" ? WebGLFloatArray : Array;
-var vec3 = {};
-vec3.create = function(a) {
-    var b = new glMatrixArrayType(3);
+glmatrix_array = typeof Float32Array != "undefined" ? Float32Array : typeof WebGLFloatArray != "undefined" ? WebGLFloatArray : Array;
+var glmatrix_vec3 = {};
+glmatrix_vec3.create = function(a) {
+    var b = new glmatrix_array(3);
     if (a) {
         b[0] = a[0];
         b[1] = a[1];
@@ -10,13 +10,13 @@ vec3.create = function(a) {
     }
     return b
 };
-vec3.set = function(a, b) {
+glmatrix_vec3.set = function(a, b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
     return b
 };
-vec3.add = function(a, b, c) {
+glmatrix_vec3.add = function(a, b, c) {
     if (!c || a == c) {
         a[0] += b[0];
         a[1] += b[1];
@@ -28,7 +28,7 @@ vec3.add = function(a, b, c) {
     c[2] = a[2] + b[2];
     return c
 };
-vec3.subtract = function(a, b, c) {
+glmatrix_vec3.subtract = function(a, b, c) {
     if (!c || a == c) {
         a[0] -= b[0];
         a[1] -= b[1];
@@ -40,14 +40,14 @@ vec3.subtract = function(a, b, c) {
     c[2] = a[2] - b[2];
     return c
 };
-vec3.negate = function(a, b) {
+glmatrix_vec3.negate = function(a, b) {
     b || (b = a);
     b[0] =- a[0];
     b[1] =- a[1];
     b[2] =- a[2];
     return b
 };
-vec3.scale = function(a, b, c) {
+glmatrix_vec3.scale = function(a, b, c) {
     if (!c || a == c) {
         a[0]*=b;
         a[1]*=b;
@@ -59,7 +59,7 @@ vec3.scale = function(a, b, c) {
     c[2] = a[2] * b;
     return c
 };
-vec3.normalize = function(a, b) {
+glmatrix_vec3.normalize = function(a, b) {
     b || (b = a);
     var c = a[0], d = a[1], e = a[2], g = Math.sqrt(c * c + d * d + e * e);
     if (g) {
@@ -81,7 +81,7 @@ vec3.normalize = function(a, b) {
     b[2] = e * g;
     return b
 };
-vec3.cross = function(a, b, c) {
+glmatrix_vec3.cross = function(a, b, c) {
     c || (c = a);
     var d = a[0], e = a[1];
     a = a[2];
@@ -92,15 +92,15 @@ vec3.cross = function(a, b, c) {
     c[2] = d * f - e * g;
     return c
 };
-vec3.length = function(a) {
+glmatrix_vec3.length = function(a) {
     var b = a[0], c = a[1];
     a = a[2];
     return Math.sqrt(b * b + c * c + a * a)
 };
-vec3.dot = function(a, b) {
+glmatrix_vec3.dot = function(a, b) {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 };
-vec3.direction = function(a, b, c) {
+glmatrix_vec3.direction = function(a, b, c) {
     c || (c = a);
     var d = a[0] - b[0], e = a[1] - b[1];
     a = a[2] - b[2];
@@ -117,19 +117,19 @@ vec3.direction = function(a, b, c) {
     c[2] = a * b;
     return c
 };
-vec3.lerp = function(a, b, c, d) {
+glmatrix_vec3.lerp = function(a, b, c, d) {
     d || (d = a);
     d[0] = a[0] + c * (b[0] - a[0]);
     d[1] = a[1] + c * (b[1] - a[1]);
     d[2] = a[2] + c * (b[2] - a[2]);
     return d
 };
-vec3.str = function(a) {
+glmatrix_vec3.str = function(a) {
     return "[" + a[0] + ", " + a[1] + ", " + a[2] + "]"
 };
-var mat3 = {};
-mat3.create = function(a) {
-    var b = new glMatrixArrayType(9);
+var glmatrix_mat3 = {};
+glmatrix_mat3.create = function(a) {
+    var b = new glmatrix_array(9);
     if (a) {
         b[0] = a[0];
         b[1] = a[1];
@@ -144,7 +144,7 @@ mat3.create = function(a) {
     }
     return b
 };
-mat3.set = function(a, b) {
+glmatrix_mat3.set = function(a, b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
@@ -156,7 +156,7 @@ mat3.set = function(a, b) {
     b[8] = a[8];
     return b
 };
-mat3.identity = function(a) {
+glmatrix_mat3.identity = function(a) {
     a[0] = 1;
     a[1] = 0;
     a[2] = 0;
@@ -168,7 +168,7 @@ mat3.identity = function(a) {
     a[8] = 1;
     return a
 };
-mat3.transpose = function(a, b) {
+glmatrix_mat3.transpose = function(a, b) {
     if (!b || a == b) {
         var c = a[1], d = a[2], e = a[5];
         a[1] = a[3];
@@ -190,8 +190,8 @@ mat3.transpose = function(a, b) {
     b[8] = a[8];
     return b
 };
-mat3.toMat4 = function(a, b) {
-    b || (b = mat4.create());
+glmatrix_mat3.toMat4 = function(a, b) {
+    b || (b = glmatrix_mat4.create());
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
@@ -210,12 +210,12 @@ mat3.toMat4 = function(a, b) {
     b[15] = 1;
     return b
 };
-mat3.str = function(a) {
+glmatrix_mat3.str = function(a) {
     return "[" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + "]"
 };
-var mat4 = {};
-mat4.create = function(a) {
-    var b = new glMatrixArrayType(16);
+var glmatrix_mat4 = {};
+glmatrix_mat4.create = function(a) {
+    var b = new glmatrix_array(16);
     if (a) {
         b[0] = a[0];
         b[1] = a[1];
@@ -236,7 +236,7 @@ mat4.create = function(a) {
     }
     return b
 };
-mat4.set = function(a, b) {
+glmatrix_mat4.set = function(a, b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
@@ -255,7 +255,7 @@ mat4.set = function(a, b) {
     b[15] = a[15];
     return b
 };
-mat4.identity = function(a) {
+glmatrix_mat4.identity = function(a) {
     a[0] = 1;
     a[1] = 0;
     a[2] = 0;
@@ -274,7 +274,7 @@ mat4.identity = function(a) {
     a[15] = 1;
     return a
 };
-mat4.transpose = function(a, b) {
+glmatrix_mat4.transpose = function(a, b) {
     if (!b || a == b) {
         var c = a[1], d = a[2], e = a[3], g = a[6], f = a[7], h = a[11];
         a[1] = a[4];
@@ -309,12 +309,12 @@ mat4.transpose = function(a, b) {
     b[15] = a[15];
     return b
 };
-mat4.determinant = function(a) {
+glmatrix_mat4.determinant = function(a) {
     var b = a[0], c = a[1], d = a[2], e = a[3], g = a[4], f = a[5], h = a[6], i = a[7], j = a[8], k = a[9], l = a[10], o = a[11], m = a[12], n = a[13], p = a[14];
     a = a[15];
     return m * k * h * e - j * n * h * e - m * f * l * e + g * n * l * e + j * f * p * e - g * k * p * e - m * k * d * i + j * n * d * i + m * c * l * i - b * n * l * i - j * c * p * i + b * k * p * i + m * f * d * o - g * n * d * o - m * c * h * o + b * n * h * o + g * c * p * o - b * f * p * o - j * f * d * a + g * k * d * a + j * c * h * a - b * k * h * a - g * c * l * a + b * f * l * a
 };
-mat4.inverse = function(a, b) {
+glmatrix_mat4.inverse = function(a, b) {
     b || (b = a);
     var c = a[0], d = a[1], e = a[2], g = a[3], f = a[4], h = a[5], i = a[6], j = a[7], k = a[8], l = a[9], o = a[10], m = a[11], n = a[12], p = a[13], r = a[14], s = a[15], A = c * h - d * f, B = c * i - e * f, t = c * j - g * f, u = d * i - e * h, v = d * j - g * h, w = e * j - g * i, x = k * p - l * n, y = k * r - o * n, z = k * s - m * n, C = l * r - o * p, D = l * s - m * p, E = o * s - m * r, q = 1 / (A * E - B * D + t * C + u * z - v * y + w * x);
     b[0] = (h * E - i * D + j * C) * q;
@@ -335,8 +335,8 @@ mat4.inverse = function(a, b) {
     b[15] = (k * u - l * B + o * A) * q;
     return b
 };
-mat4.toRotationMat = function(a, b) {
-    b || (b = mat4.create());
+glmatrix_mat4.toRotationMat = function(a, b) {
+    b || (b = glmatrix_mat4.create());
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
@@ -355,8 +355,8 @@ mat4.toRotationMat = function(a, b) {
     b[15] = 1;
     return b
 };
-mat4.toMat3 = function(a, b) {
-    b || (b = mat3.create());
+glmatrix_mat4.toMat3 = function(a, b) {
+    b || (b = glmatrix_mat3.create());
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
@@ -368,12 +368,12 @@ mat4.toMat3 = function(a, b) {
     b[8] = a[10];
     return b
 };
-mat4.toInverseMat3 = function(a, b) {
+glmatrix_mat4.toInverseMat3 = function(a, b) {
     var c = a[0], d = a[1], e = a[2], g = a[4], f = a[5], h = a[6], i = a[8], j = a[9], k = a[10], l = k * f - h * j, o =- k * g + h * i, m = j * g - f * i, n = c * l + d * o + e * m;
     if (!n)
         return null;
     n = 1 / n;
-    b || (b = mat3.create());
+    b || (b = glmatrix_mat3.create());
     b[0] = l * n;
     b[1] = ( - k * d + e * j) * n;
     b[2] = (h * d - e * f) * n;
@@ -385,7 +385,7 @@ mat4.toInverseMat3 = function(a, b) {
     b[8] = (f * c - d * g) * n;
     return b
 };
-mat4.multiply = function(a, b, c) {
+glmatrix_mat4.multiply = function(a, b, c) {
     c || (c = a);
     var d = a[0], e = a[1], g = a[2], f = a[3], h = a[4], i = a[5], j = a[6], k = a[7], l = a[8], o = a[9], m = a[10], n = a[11], p = a[12], r = a[13], s = a[14];
     a = a[15];
@@ -410,7 +410,7 @@ mat4.multiply = function(a, b, c) {
     c[15] = q * f + F * k + G * n + b * a;
     return c
 };
-mat4.multiplyVec3 = function(a, b, c) {
+glmatrix_mat4.multiplyVec3 = function(a, b, c) {
     c || (c = b);
     var d = b[0], e = b[1];
     b = b[2];
@@ -419,7 +419,7 @@ mat4.multiplyVec3 = function(a, b, c) {
     c[2] = a[2] * d + a[6] * e + a[10] * b + a[14];
     return c
 };
-mat4.multiplyVec4 = function(a, b, c) {
+glmatrix_mat4.multiplyVec4 = function(a, b, c) {
     c || (c = b);
     var d = b[0], e = b[1], g = b[2];
     b = b[3];
@@ -429,7 +429,7 @@ mat4.multiplyVec4 = function(a, b, c) {
     c[3] = a[3] * d + a[7] * e + a[11] * g + a[15] * b;
     return c
 };
-mat4.translate = function(a, b, c) {
+glmatrix_mat4.translate = function(a, b, c) {
     var d = b[0], e = b[1];
     b = b[2];
     if (!c || a == c) {
@@ -458,7 +458,7 @@ mat4.translate = function(a, b, c) {
     c[15] = i * d + o * e + r * b + a[15];
     return c
 };
-mat4.scale = function(a, b, c) {
+glmatrix_mat4.scale = function(a, b, c) {
     var d = b[0], e = b[1];
     b = b[2];
     if (!c || a == c) {
@@ -494,7 +494,7 @@ mat4.scale = function(a, b, c) {
     c[15] = a[15];
     return c
 };
-mat4.rotate = function(a, b, c, d) {
+glmatrix_mat4.rotate = function(a, b, c, d) {
     var e = c[0], g = c[1];
     c = c[2];
     var f = Math.sqrt(e * e + g * g + c * c);
@@ -536,7 +536,7 @@ mat4.rotate = function(a, b, c, d) {
     d[11] = l * z + p * e + B * g;
     return d
 };
-mat4.rotateX = function(a, b, c) {
+glmatrix_mat4.rotateX = function(a, b, c) {
     var d = Math.sin(b);
     b = Math.cos(b);
     var e = a[4], g = a[5], f = a[6], h = a[7], i = a[8], j = a[9], k = a[10], l = a[11];
@@ -563,7 +563,7 @@ mat4.rotateX = function(a, b, c) {
     c[11] = h*-d + l * b;
     return c
 };
-mat4.rotateY = function(a, b, c) {
+glmatrix_mat4.rotateY = function(a, b, c) {
     var d = Math.sin(b);
     b = Math.cos(b);
     var e = a[0], g = a[1], f = a[2], h = a[3], i = a[8], j = a[9], k = a[10], l = a[11];
@@ -590,7 +590,7 @@ mat4.rotateY = function(a, b, c) {
     c[11] = h * d + l * b;
     return c
 };
-mat4.rotateZ = function(a, b, c) {
+glmatrix_mat4.rotateZ = function(a, b, c) {
     var d = Math.sin(b);
     b = Math.cos(b);
     var e = a[0], g = a[1], f = a[2], h = a[3], i = a[4], j = a[5], k = a[6], l = a[7];
@@ -617,8 +617,8 @@ mat4.rotateZ = function(a, b, c) {
     c[7] = h*-d + l * b;
     return c
 };
-mat4.frustum = function(a, b, c, d, e, g, f) {
-    f || (f = mat4.create());
+glmatrix_mat4.frustum = function(a, b, c, d, e, g, f) {
+    f || (f = glmatrix_mat4.create());
     var h = b - a, i = d - c, j = g - e;
     f[0] = e * 2 / h;
     f[1] = 0;
@@ -638,13 +638,13 @@ mat4.frustum = function(a, b, c, d, e, g, f) {
     f[15] = 0;
     return f
 };
-mat4.perspective = function(a, b, c, d, e) {
+glmatrix_mat4.perspective = function(a, b, c, d, e) {
     a = c * Math.tan(a * Math.PI / 360);
     b = a * b;
-    return mat4.frustum( - b, b, - a, a, c, d, e)
+    return glmatrix_mat4.frustum( - b, b, - a, a, c, d, e)
 };
-mat4.ortho = function(a, b, c, d, e, g, f) {
-    f || (f = mat4.create());
+glmatrix_mat4.ortho = function(a, b, c, d, e, g, f) {
+    f || (f = glmatrix_mat4.create());
     var h = b - a, i = d - c, j = g - e;
     f[0] = 2 / h;
     f[1] = 0;
@@ -664,15 +664,15 @@ mat4.ortho = function(a, b, c, d, e, g, f) {
     f[15] = 1;
     return f
 };
-mat4.lookAt = function(a, b, c, d) {
-    d || (d = mat4.create());
+glmatrix_mat4.lookAt = function(a, b, c, d) {
+    d || (d = glmatrix_mat4.create());
     var e = a[0], g = a[1];
     a = a[2];
     var f = c[0], h = c[1], i = c[2];
     c = b[1];
     var j = b[2];
     if (e == b[0] && g == c && a == j)
-        return mat4.identity(d);
+        return glmatrix_mat4.identity(d);
     var k, l, o, m;
     c = e - b[0];
     j = g - b[1];
@@ -720,12 +720,12 @@ mat4.lookAt = function(a, b, c, d) {
     d[15] = 1;
     return d
 };
-mat4.str = function(a) {
+glmatrix_mat4.str = function(a) {
     return "[" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + ", " + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + "]"
 };
-quat4 = {};
-quat4.create = function(a) {
-    var b = new glMatrixArrayType(4);
+glmatrix_quat4 = {};
+glmatrix_quat4.create = function(a) {
+    var b = new glmatrix_array(4);
     if (a) {
         b[0] = a[0];
         b[1] = a[1];
@@ -734,14 +734,14 @@ quat4.create = function(a) {
     }
     return b
 };
-quat4.set = function(a, b) {
+glmatrix_quat4.set = function(a, b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
     b[3] = a[3];
     return b
 };
-quat4.calculateW = function(a, b) {
+glmatrix_quat4.calculateW = function(a, b) {
     var c = a[0], d = a[1], e = a[2];
     if (!b || a == b) {
         a[3] =- Math.sqrt(Math.abs(1 - c * c - d * d - e * e));
@@ -753,7 +753,7 @@ quat4.calculateW = function(a, b) {
     b[3] =- Math.sqrt(Math.abs(1 - c * c - d * d - e * e));
     return b
 };
-quat4.inverse = function(a, b) {
+glmatrix_quat4.inverse = function(a, b) {
     if (!b || a == b) {
         a[0]*=1;
         a[1]*=1;
@@ -766,12 +766,12 @@ quat4.inverse = function(a, b) {
     b[3] = a[3];
     return b
 };
-quat4.length = function(a) {
+glmatrix_quat4.length = function(a) {
     var b = a[0], c = a[1], d = a[2];
     a = a[3];
     return Math.sqrt(b * b + c * c + d * d + a * a)
 };
-quat4.normalize = function(a, b) {
+glmatrix_quat4.normalize = function(a, b) {
     b || (b = a);
     var c = a[0], d = a[1], e = a[2], g = a[3], f = Math.sqrt(c * c + d * d + e * e + g * g);
     if (f == 0) {
@@ -788,7 +788,7 @@ quat4.normalize = function(a, b) {
     b[3] = g * f;
     return b
 };
-quat4.multiply = function(a, b, c) {
+glmatrix_quat4.multiply = function(a, b, c) {
     c || (c = a);
     var d = a[0], e = a[1], g = a[2];
     a = a[3];
@@ -800,7 +800,7 @@ quat4.multiply = function(a, b, c) {
     c[3] = a * b - d * f - e * h - g * i;
     return c
 };
-quat4.multiplyVec3 = function(a, b, c) {
+glmatrix_quat4.multiplyVec3 = function(a, b, c) {
     c || (c = b);
     var d = b[0], e = b[1], g = b[2];
     b = a[0];
@@ -813,8 +813,8 @@ quat4.multiplyVec3 = function(a, b, c) {
     c[2] = k * a + d*-h + i*-f - j*-b;
     return c
 };
-quat4.toMat3 = function(a, b) {
-    b || (b = mat3.create());
+glmatrix_quat4.toMat3 = function(a, b) {
+    b || (b = glmatrix_mat3.create());
     var c = a[0], d = a[1], e = a[2], g = a[3], f = c + c, h = d + d, i = e + e, j = c * f, k = c * h;
     c = c * i;
     var l = d * h;
@@ -834,8 +834,8 @@ quat4.toMat3 = function(a, b) {
     b[8] = 1 - (j + l);
     return b
 };
-quat4.toMat4 = function(a, b) {
-    b || (b = mat4.create());
+glmatrix_quat4.toMat4 = function(a, b) {
+    b || (b = glmatrix_mat4.create());
     var c = a[0], d = a[1], e = a[2], g = a[3], f = c + c, h = d + d, i = e + e, j = c * f, k = c * h;
     c = c * i;
     var l = d * h;
@@ -862,7 +862,7 @@ quat4.toMat4 = function(a, b) {
     b[15] = 1;
     return b
 };
-quat4.slerp = function(a, b, c, d) {
+glmatrix_quat4.slerp = function(a, b, c, d) {
     d || (d = a);
     var e = c;
     if (a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3] < 0)
@@ -873,7 +873,7 @@ quat4.slerp = function(a, b, c, d) {
     d[3] = 1 - c * a[3] + e * b[3];
     return d
 };
-quat4.str = function(a) {
+glmatrix_quat4.str = function(a) {
     return "[" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + "]"
 };
 
