@@ -10,13 +10,23 @@ function engine_new(htmlid_canvas, htmlid_vshader, htmlid_fshader) {
     gl.useProgram(program);
 
     let shadervars = {
-        va_position:        gl.getAttribLocation(program,  "va_position"),
-        va_normal:          gl.getAttribLocation(program,  "va_normal"),
-        vu_canvassize:      gl.getUniformLocation(program, "vu_canvassize"),
-        vu_transform:       gl.getUniformLocation(program, "vu_transform"),
-        vu_cameratransform: gl.getUniformLocation(program, "vu_cameratransform"),
-        vu_projection:      gl.getUniformLocation(program, "vu_projection"),
-        fu_color:           gl.getUniformLocation(program, "fu_color"),
+        va_position:             gl.getAttribLocation(program,  "va_position"),
+        va_normal:               gl.getAttribLocation(program,  "va_normal"),
+        vu_canvassize:           gl.getUniformLocation(program, "vu_canvassize"),
+        vu_transform:            gl.getUniformLocation(program, "vu_transform"),
+        vu_cameratransform:      gl.getUniformLocation(program, "vu_cameratransform"),
+        vu_projection:           gl.getUniformLocation(program, "vu_projection"),
+
+        fu_materialambient:      gl.getUniformLocation(program, "fu_materialambient"),
+        fu_materialdiffuse:      gl.getUniformLocation(program, "fu_materialdiffuse"),
+        fu_materialspecular:     gl.getUniformLocation(program, "fu_materialspecular"),
+        fu_materialreflectivity: gl.getUniformLocation(program, "fu_materialreflectivity"),
+
+        fu_cameraposition:       gl.getUniformLocation(program, "fu_cameraposition"),
+        fu_lightposition:        gl.getUniformLocation(program, "fu_lightposition"),
+        fu_lightambient:         gl.getUniformLocation(program, "fu_lightambient"),
+        fu_lightdiffuse:         gl.getUniformLocation(program, "fu_lightdiffuse"),
+        fu_lightspecular:        gl.getUniformLocation(program, "fu_lightspecular"),
     };
 
     return {
@@ -85,10 +95,20 @@ function engine_run(engine) {
     engine.camera = camera;
 
     engine.nodes.push(engine.camera.add_child(
-        new CubeMesh(engine.gl, vec3_new(0, 0, 0), vec3_new(5, 5, 5), color_new(0.0, 0.0, 0.0, 1.0), (node, delta) => {})
+        new CubeMesh(engine.gl, vec3_new(0, 0, 0), vec3_new(5, 5, 5),
+            material_new(
+                color_new(0.0, 0.0, 0.0, 1.0),
+                color_new(0.0, 0.0, 0.0, 1.0),
+                color_new(0.0, 0.0, 0.0, 1.0),
+            ), (node, delta) => {})
     ));
     engine.nodes.push(engine.camera.add_child(
-        new CubeMesh(engine.gl, vec3_new(0, 0, -2.5), vec3_new(4, 4, 4), color_new(5.0, 5.0, 5.0, 1.0), (node, delta) => {})
+        new CubeMesh(engine.gl, vec3_new(0, 0, -2.5), vec3_new(4, 4, 4), 
+            material_new(
+                color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(1.0, 1.0, 1.0, 1.0),
+            ), (node, delta) => {})
     ));
 
     // spawn a grid of cubes
@@ -97,7 +117,11 @@ function engine_run(engine) {
             let height = 20 * Math.random();
             let pos = vec3_new((x-0.5)*20*15, height/2 - 20, (z-0.5)*20*15);
             let col = color_new(x*0.75+0.25, 1.0, z*0.75+0.25, 1.0);
-            let cube = new CubeMesh(engine.gl, pos, vec3_new(10, height, 10), col, (node, delta) => {
+            let cube = new CubeMesh(engine.gl, pos, vec3_new(10, height, 10), material_new(
+                col,
+                color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(1.0, 1.0, 1.0, 1.0),
+            ), (node, delta) => {
                 //node.transform = transform_translate(node.transform, vec3_new(0, Math.sin(engine.time) * delta, 0));
                 //node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0.5, 0.5), Math.PI * 0.5 * delta);
             });
@@ -105,6 +129,7 @@ function engine_run(engine) {
         }
     }
 
+    /*
     // make pillars
     let pillar = (position) => {
         for (let i = 0; i < 10; i++) {
@@ -116,7 +141,11 @@ function engine_run(engine) {
                 Math.random()*10 + 10,
                 4,
                 8,
-                color_new(1.0, 0.5 + (i/20), 1.0, 1.0),
+                material_new(
+                    color_new(1.0, 0.5 + (i/20), 1.0, 1.0),
+                    color_new(1.0, 1.0, 1.0, 1.0),
+                    color_new(1.0, 1.0, 1.0, 1.0),
+                ),
                 (node, delta) => {}
             );
             engine.nodes.push(segment);
@@ -128,6 +157,7 @@ function engine_run(engine) {
         let z = Math.cos(i) * 300;
         pillar(vec3_new(x, 0, z));
     }
+    */
 
     // make orrery
     let sun = new SphereMesh(
@@ -136,7 +166,12 @@ function engine_run(engine) {
         40,
         8,
         16,
-        color_new(1.0, 0.7, 0.5, 1.0),
+        material_new(
+            //color_new(1.0, 0.7, 0.5, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+        ),
         (node, delta) => {
             let new_y = Math.sin(engine.time * 2) * 10;
             let delta_y = new_y - node._y;
@@ -154,7 +189,11 @@ function engine_run(engine) {
             5,
             4,
             8,
-            color_new(Math.random(), Math.random(), Math.random(), 1.0),
+            material_new(
+                color_new(Math.random(), Math.random(), Math.random(), 1.0),
+                color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(1.0, 1.0, 1.0, 1.0),
+            ),
             (node, delta) => {
                 node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
             }
@@ -172,9 +211,13 @@ function engine_run(engine) {
                 2,
                 3,
                 6,
-                color_new(Math.random(), Math.random(), Math.random(), 1.0),
+                material_new(
+                    color_new(Math.random(), Math.random(), Math.random(), 1.0),
+                    color_new(1.0, 1.0, 1.0, 1.0),
+                    color_new(1.0, 1.0, 1.0, 1.0),
+                ),
                 (node, delta) => {
-                    node.transfomr = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
+                    node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
                 }
             );
             moon._speed = Math.PI * 0.7 * Math.random() / (m/3);
@@ -184,79 +227,48 @@ function engine_run(engine) {
     }
 
     // add player
-    let player = new CubeMesh(engine.gl, vec3_new(50, 5, 0), vec3_new(10, 10, 10), color_new(0.0, 0.5, 0.8, 1.0), (node, delta) => {
-        let movement = vec3_new(0, 0, 0);
-        let speed = 100;
-        if (global_keys.has("a")) {
-            movement.x -= 1;
+    let player = new CubeMesh(engine.gl, vec3_new(50, 5, 0), vec3_new(10, 10, 10),
+        material_new(
+            color_new(0.0, 0.5, 0.8, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+        ), (node, delta) => {
+            let movement = vec3_new(0, 0, 0);
+            let speed = 100;
+            if (global_keys.has("a")) {
+                movement.x -= 1;
+            }
+            if (global_keys.has("d")) {
+                movement.x += 1;
+            }
+            if (global_keys.has("w")) {
+                movement.z -= 1;
+            }
+            if (global_keys.has("s")) {
+                movement.z += 1;
+            }
+            node.transform = transform_translate(node.transform, vec3_scale(movement, speed * delta));
         }
-        if (global_keys.has("d")) {
-            movement.x += 1;
-        }
-        if (global_keys.has("w")) {
-            movement.z -= 1;
-        }
-        if (global_keys.has("s")) {
-            movement.z += 1;
-        }
-        node.transform = transform_translate(node.transform, vec3_scale(movement, speed * delta));
-    });
+    );
     player.add_child(sun);
     engine.nodes.push(player);
 
-    // spawn some weird cube thing
-    /*
-    let cube = new CubeMesh(engine.gl, vec3_new(50, 25, 0), vec3_new(10, 10, 10), color_new(0.0, 0.5, 0.8, 1.0), (node, delta) => {
-        //node.transform = transform_translate(node.transform, vec3_scale(vec3_new(-100, 0, 0), delta));
-        node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), 1 * delta);
-        node.transform = transform_rotatelocal(node.transform, vec3_new(1, 0, 0), -Math.PI * delta);
-        //node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), -Math.PI * delta);
-    });
-    engine.nodes.push(cube);
-    */
-    /*
-    let childcube = new CubeMesh(engine.gl, vec3_new(3, 0, 0), vec3_new(1, 1, 1), color_new(1.0, 0.0, 1.0, 1.0), (node, delta) => {});
-    cube.add_child(childcube);
-    engine.nodes.push(childcube);
-    */
-
-    /*
-    engine.nodes.push(new Mesh(
-        engine.gl,
-        transform_translate(transform_new(), vec3_new(0, 0, 50)),
-        [
-            vec3_new(0, 0, 0),
-            vec3_new(100, 0, 0),
-            vec3_new(100, 100, 0),
-        ],
-        color_new(1.0, 0.3, 0.3, 1.0),
-        (node, delta) => {}
-    ));
-
-    engine.nodes.push(new Mesh(
-        engine.gl,
-        transform_translate(transform_new(), vec3_new(-200, 400, -200)),
-        [
-            vec3_new(0, 0, 0),
-            vec3_new(0, 0, -100),
-            vec3_new(0, 400, 0),
-
-            vec3_new(0, 400, -110),
-            vec3_new(0, 400, -10),
-            vec3_new(0, 0, -110),
-
-            vec3_new(-400, 0, 0),
-            vec3_new(0, 0, 0),
-            vec3_new(-400, 400, 0),
-
-            vec3_new(-400, 0, -100),
-            vec3_new(0, 0, -100),
-            vec3_new(-400, 0, 0),
-        ],
-        color_new(1.0, 0.3, 0.3, 1.0),
-        (node, delta) => {}
-    ));
-    */
+    // add lighting
+    let light = new PointLight(transform_translate(transform_new(), vec3_new(0, 100, 0)),
+        material_new(
+            color_new(0.2, 0.2, 0.2, 1.0),
+            color_new(1.0, 0.0, 0.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+        ), (node, delta) => {});
+    engine.nodes.push(light);
+    let lightshape = new SphereMesh(engine.gl, vec3_new(0, 0, 0), 5, 4, 8,
+        material_new(
+            color_new(1.0, 0.0, 0.0, 0.0),
+            color_new(1.0, 0.0, 0.0, 0.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+        ), (node, delta) => {});
+    engine.nodes.push(lightshape);
+    light.add_child(lightshape);
 
     // start draw loop
     requestAnimationFrame((timestamp) => engine_draw(engine, timestamp));
@@ -295,13 +307,68 @@ function engine_draw(engine, timestamp) {
             gl_uniform_transform(gl, shadervars.vu_transform, node.get_global_transform());
             gl_uniform_transform(gl, shadervars.vu_cameratransform, engine.camera.get_global_transform());
             //gl_uniform_mat4(gl, shadervars.vu_cameratransform, mat4_inverse(engine.camera.get_global_transform()));
-            gl.uniform4fv(shadervars.fu_color, [
-                node.color.r,
-                node.color.b,
-                node.color.g,
-                node.color.a,
-            ]);
             gl_uniform_mat4(gl, shadervars.vu_projection, engine.camera.projection);
+
+            // lighting
+            let light = null; // find closest light
+            let lightdistance = 0.0;
+            for (let node2 of engine.nodes) {
+                if (node2 instanceof PointLight) {
+                    distance = vec3_length(
+                        transform_getposition(node2.get_global_transform()),
+                        node.position
+                    );
+                    if (light == null || distance < lightdistance) {
+                        light = node2;
+                        lightdistance = distance;
+                    }
+                }
+            }
+            console.assert(light != null, "scene must contain at least 1 light");
+            gl.uniform3fv(shadervars.fu_materialambient, [
+                node.material.ambient.r,
+                node.material.ambient.g,
+                node.material.ambient.b,
+            ]);
+            gl.uniform3fv(shadervars.fu_materialdiffuse, [
+                node.material.diffuse.r,
+                node.material.diffuse.g,
+                node.material.diffuse.b,
+            ]);
+            gl.uniform3fv(shadervars.fu_materialspecular, [
+                node.material.specular.r,
+                node.material.specular.g,
+                node.material.specular.b,
+            ]);
+            gl.uniform1f(shadervars.fu_materialreflectivity, 4.0); // TODO: get from material
+            let cameraposition = transform_getposition(engine.camera.get_global_transform());
+            gl.uniform3fv(shadervars.fu_cameraposition, [
+                cameraposition.x,
+                cameraposition.y,
+                cameraposition.z,
+            ]);
+            let lightposition = transform_getposition(light.get_global_transform());
+            gl.uniform3fv(shadervars.fu_lightposition, [
+                lightposition.x,
+                lightposition.y,
+                lightposition.z,
+            ]);
+            gl.uniform3fv(shadervars.fu_lightambient, [
+                light.material.ambient.r,
+                light.material.ambient.g,
+                light.material.ambient.b,
+            ]);
+            gl.uniform3fv(shadervars.fu_lightdiffuse, [
+                light.material.diffuse.r,
+                light.material.diffuse.g,
+                light.material.diffuse.b,
+            ]);
+            gl.uniform3fv(shadervars.fu_lightspecular, [
+                light.material.specular.r,
+                light.material.specular.g,
+                light.material.specular.b,
+            ]);
+
             gl.drawArrays(gl.TRIANGLES, 0, node.vbo_vertices_length / 3);
             //gl.drawArrays(gl.LINE_LOOP, 0, node.vbo_vertices_length / 3);
         }

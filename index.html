@@ -12,9 +12,12 @@
             uniform mat4 vu_transform;
             uniform mat4 vu_cameratransform;
             uniform mat4 vu_projection;
-            varying vec4 fv_normal;
+            varying vec3 fv_position;
+            varying vec3 fv_normal;
 
             void main(void) {
+                gl_PointSize = 3.0;
+
                 vec4 pos = vec4(va_position, 1); // pos is in world coordinates (intended to be equivalent to pixel coordinates)
 
                 // [ n/r 0   0            0
@@ -28,7 +31,10 @@
                 // (see http://www.songho.ca/opengl/gl_projectionmatrix.html)
 
                 //pos = vec4((vu_transform * vec4(pos.xyz, 1)).xyz, 1); // apply transform in world coordinate space
-                pos = vu_cameratransform * vu_transform * pos;
+
+                vec4 worldposition = vu_transform * pos;
+
+                pos = vu_cameratransform * worldposition;
                 //pos.xy += vu_canvassize * vec2(-0.5, -0.5); // translate world coordinates so the center of the screen is (0, 0). (e.g. x=400 on an 800px wide screen is now x=0)
                 pos.xy /= vu_canvassize * vec2(0.5, 0.5);   // scale coordinates to map everything to [-1, 1]. (e.g. x=0 on an 800px wide screen is now x=-1, whereas x=800 is now x=1)
                 //pos.y *= -1.0; // flip the y coordinate system for sanity
@@ -40,21 +46,51 @@
                 pos.w = pos.z * 1.0 + 0.01; // opengl automatically normalizes gl_Position wrt w
 
                 gl_Position = pos;
-
-                gl_PointSize = 3.0;
-
-                fv_normal = vec4(va_normal, 1.0);
+                fv_position = worldposition.xyz;
+                fv_normal = va_normal;
             }
         </script>
         <script id="fragmentshader" type="x-shader/x-fragment" src="fshader.glsl">
             precision mediump float; // see https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html
 
-            varying vec4 fv_normal;
-            uniform vec4 fu_color;
+            varying vec3 fv_position;
+            varying vec3 fv_normal;
+
+            uniform vec3 fu_materialambient;
+            uniform vec3 fu_materialdiffuse;
+            uniform vec3 fu_materialspecular;
+            uniform float fu_materialreflectivity;
+
+            uniform vec3 fu_cameraposition;
+            uniform vec3 fu_lightposition;
+            uniform vec3 fu_lightambient;
+            uniform vec3 fu_lightdiffuse;
+            uniform vec3 fu_lightspecular;
 
             void main(void) {
-                //gl_FragColor = fu_color;
-                gl_FragColor = fv_normal + fu_color;
+                vec3 lightvector = fv_position - fu_lightposition;
+                vec3 reflectionvector = reflect(lightvector, fv_normal); // TODO: -lightvector instead?
+                vec3 viewvector = fv_position - fu_cameraposition;
+
+                vec3 ambient = fu_materialambient * fu_lightambient;
+                ambient = clamp(ambient, 0.0, 1.0);
+
+                vec3 diffuse = fu_materialdiffuse * fu_lightdiffuse * dot(fv_normal, -lightvector);
+                diffuse = clamp(diffuse, 0.0, 1.0);
+
+                vec3 specular = fu_materialspecular * fu_lightspecular * pow(dot(reflectionvector, viewvector), fu_materialreflectivity);
+                specular = clamp(specular, 0.0, 1.0);
+
+                float lightdistance = length(lightvector);
+                float attenuation = pow(clamp(1.0 - lightdistance/512.0, 0.0, 1.0), 2.0);
+                //vec3 illumination = ambient * diffuse * specular;
+                //vec3 illumination = ambient + diffuse * 0.01;
+                vec3 illumination = vec3(0.0, 0.0, 0.0);
+                illumination += diffuse;
+                illumination += specular * 0.5;
+                illumination *= attenuation;
+                illumination += ambient;
+                gl_FragColor = vec4(illumination, 1.0);
             }
         </script>
 
@@ -75,6 +111,7 @@
         <script src="mat3.js"></script>
         <script src="mat4.js"></script>
         <script src="transform.js"></script>
+        <script src="material.js"></script>
         <script src="node.js"></script>
         <script src="gl.js"></script>
         <script src="engine.js"></script>

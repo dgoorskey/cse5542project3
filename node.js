@@ -29,6 +29,15 @@ class Node {
     }
 }
 
+class PointLight extends Node {
+    constructor(transform, material, updatecallback) {
+        super(transform, updatecallback);
+
+        this.material = material;
+        // TODO: other attributes?
+    }
+}
+
 class Camera extends Node {
     constructor(transform, fov, aspect, near, far, updatecallback) {
         super(transform, updatecallback);
@@ -57,9 +66,9 @@ class Camera extends Node {
 class Mesh extends Node {
     /* vec3_vertices is an array of vec3, each representing a vertex.
      * every 3 vertices becomes a triangle. */
-    constructor(gl, transform, vec3_vertices, vec3_normals, color, updatecallback) {
+    constructor(gl, transform, vec3_vertices, vec3_normals, material, updatecallback) {
         super(transform, updatecallback);
-        this.color = color;
+        this.material = material;
 
         this.vbo_vertices = gl.createBuffer();
         this.vbo_vertices_length = vec3_vertices.length * 3;
@@ -88,7 +97,7 @@ class Mesh extends Node {
 }
 
 class CubeMesh extends Mesh {
-    constructor(gl, vec3_position, vec3_size, color, updatecallback) {
+    constructor(gl, vec3_position, vec3_size, material, updatecallback) {
         let transform = transform_translate(transform_new(), vec3_position);
 
         // a-----b      (+y)
@@ -149,12 +158,12 @@ class CubeMesh extends Mesh {
             vec3_new(0, 0, 1), vec3_new(0, 0, 1), vec3_new(0, 0, 1),
             vec3_new(0, 0, 1), vec3_new(0, 0, 1), vec3_new(0, 0, 1),
             vec3_new(0, 0, 1), vec3_new(0, 0, 1), vec3_new(0, 0, 1),
-        ], color, updatecallback);
+        ], material, updatecallback);
     }
 }
 
 class CylinderMesh extends Mesh {
-    constructor(gl, vec3_position, height, bottomradius, topradius, stacks, slices, color, updatecallback) {
+    constructor(gl, vec3_position, height, bottomradius, topradius, stacks, slices, material, updatecallback) {
         let transform = transform_translate(transform_new(), vec3_position);
 
         // given cylinder params and a ring and column idx, calculates and returns that vertex.
@@ -291,12 +300,12 @@ class CylinderMesh extends Mesh {
             normals.push(vec3_new(0, 1, 0));
         }
 
-        super(gl, transform, vertices, normals, color, updatecallback);
+        super(gl, transform, vertices, normals, material, updatecallback);
     }
 }
 
 class SphereMesh extends Mesh {
-    constructor(gl, vec3_position, radius, stacks, slices, color, updatecallback) {
+    constructor(gl, vec3_position, radius, stacks, slices, material, updatecallback) {
         let transform = transform_translate(transform_new(), vec3_position);
 
         // given sphere params and a ring and column idx, calculates and returns that vertex.
@@ -423,7 +432,7 @@ class SphereMesh extends Mesh {
             ));
         }
 
-        super(gl, transform, vertices, normals, color, updatecallback);
+        super(gl, transform, vertices, normals, material, updatecallback);
     }
 }
 
