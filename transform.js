@@ -89,6 +89,11 @@ function transform_scalelocal(transform, vec3) {
     return transform;
 }
 
+function transform_inverse(transform) {
+    transform.mat = mat4_inverse(transform.mat);
+    return transform;
+}
+
 // TODO: normalize so z=1
 
 function transform_print(transform) {

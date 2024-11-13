@@ -218,6 +218,7 @@ function mat4_transpose(mat4) {
 
 /* returns the inverse
    (see https://www.mathsisfun.com/algebra/matrix-inverse-minors-cofactors-adjugate.html) */
+/*
 function mat4_inverse(mat4) {
     let minors = mat4_minors(mat4);
     let cofactors = mat4_cofactors(minors);
@@ -226,5 +227,21 @@ function mat4_inverse(mat4) {
     //console.log(determinant);
     let result = mat4_multiplyfloat(adjugate, 1/determinant);
     return result;
+}
+*/
+function mat4_inverse(mat4) {
+    let glmat = glmatrix_mat4.transpose(glmatrix_mat4.create([
+        mat4.a, mat4.b, mat4.c, mat4.d,
+        mat4.e, mat4.f, mat4.g, mat4.h,
+        mat4.i, mat4.j, mat4.k, mat4.l,
+        mat4.m, mat4.n, mat4.o, mat4.p,
+    ])); // transposed because glmatrix has rows/cols swapped
+    glmat = glmatrix_mat4.inverse(glmat);
+    return mat4_new(
+        glmat[0], glmat[4], glmat[8],  glmat[12],
+        glmat[1], glmat[5], glmat[9],  glmat[13],
+        glmat[2], glmat[6], glmat[10], glmat[14],
+        glmat[3], glmat[7], glmat[11], glmat[15],
+    );
 }
 

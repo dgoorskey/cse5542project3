@@ -69,25 +69,24 @@
 
             void main(void) {
                 vec3 lightvector = fv_position - fu_lightposition;
-                vec3 reflectionvector = reflect(lightvector, fv_normal); // TODO: -lightvector instead?
+                vec3 reflectionvector = reflect(-lightvector, fv_normal); // TODO: -lightvector instead?
                 vec3 viewvector = fv_position - fu_cameraposition;
 
                 vec3 ambient = fu_materialambient * fu_lightambient;
                 ambient = clamp(ambient, 0.0, 1.0);
 
-                vec3 diffuse = fu_materialdiffuse * fu_lightdiffuse * dot(fv_normal, -lightvector);
+                vec3 diffuse = fu_materialdiffuse * fu_lightdiffuse * dot(fv_normal, normalize(-lightvector));
                 diffuse = clamp(diffuse, 0.0, 1.0);
 
-                vec3 specular = fu_materialspecular * fu_lightspecular * pow(dot(reflectionvector, viewvector), fu_materialreflectivity);
+                vec3 specular = fu_materialspecular * fu_lightspecular * pow(dot(normalize(reflectionvector), normalize(viewvector)), fu_materialreflectivity);
                 specular = clamp(specular, 0.0, 1.0);
 
                 float lightdistance = length(lightvector);
                 float attenuation = pow(clamp(1.0 - lightdistance/512.0, 0.0, 1.0), 2.0);
-                //vec3 illumination = ambient * diffuse * specular;
-                //vec3 illumination = ambient + diffuse * 0.01;
+
                 vec3 illumination = vec3(0.0, 0.0, 0.0);
                 illumination += diffuse;
-                illumination += specular * 0.5;
+                illumination += specular;
                 illumination *= attenuation;
                 illumination += ambient;
                 gl_FragColor = vec4(illumination, 1.0);
@@ -104,6 +103,7 @@
             });
         </script>
 
+        <script src="glmatrix.js"></script>
         <script src="color.js"></script>
         <script src="vec3.js"></script>
         <script src="vec4.js"></script>

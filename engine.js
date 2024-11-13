@@ -49,7 +49,7 @@ function engine_run(engine) {
     let aspect = engine.gl.canvas.clientWidth / engine.gl.canvas.clientHeight;
     //let camera = new Camera(transform_translate(transform_new(), vec3_new(0, 100, 0)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
     let camera = new Camera(
-        transform_translate(transform_new(), vec3_new(0, -100, -100)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
+        transform_translate(transform_new(), vec3_new(0, 100, 100)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
         // basic camera animation
         // this works somehow
         /*
@@ -66,22 +66,22 @@ function engine_run(engine) {
 
         let turnspeed = Math.PI * 0.1 * delta;
         if (global_keys.has("p")) {
-            node.transform = transform_rotate(node.transform, vec3_new(1, 0, 0), turnspeed);
+            node.transform = transform_rotatelocal(node.transform, vec3_new(1, 0, 0), turnspeed);
         }
         if (global_keys.has("P")) {
-            node.transform = transform_rotate(node.transform, vec3_new(1, 0, 0), -turnspeed);
+            node.transform = transform_rotatelocal(node.transform, vec3_new(1, 0, 0), -turnspeed);
         }
         if (global_keys.has("y")) {
-            node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), turnspeed);
+            node.transform = transform_rotatelocal(node.transform, vec3_new(0, 1, 0), turnspeed);
         }
         if (global_keys.has("Y")) {
-            node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), -turnspeed);
+            node.transform = transform_rotatelocal(node.transform, vec3_new(0, 1, 0), -turnspeed);
         }
         if (global_keys.has("r")) {
-            node.transform = transform_rotate(node.transform, vec3_new(0, 0, 1), turnspeed);
+            node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), turnspeed);
         }
         if (global_keys.has("R")) {
-            node.transform = transform_rotate(node.transform, vec3_new(0, 0, 1), -turnspeed);
+            node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), -turnspeed);
         }
         if (global_keys.has(" ")) {
             if (global_keys.has("Shift")) {
@@ -94,6 +94,7 @@ function engine_run(engine) {
     engine.nodes.push(camera);
     engine.camera = camera;
 
+    /*
     engine.nodes.push(engine.camera.add_child(
         new CubeMesh(engine.gl, vec3_new(0, 0, 0), vec3_new(5, 5, 5),
             material_new(
@@ -110,6 +111,7 @@ function engine_run(engine) {
                 color_new(1.0, 1.0, 1.0, 1.0),
             ), (node, delta) => {})
     ));
+    */
 
     // spawn a grid of cubes
     for (let x = 0; x <= 1; x += 1/20) {
@@ -305,8 +307,9 @@ function engine_draw(engine, timestamp) {
             // other vars
             gl.uniform2fv(shadervars.vu_canvassize, [gl.canvas.width, gl.canvas.height]);
             gl_uniform_transform(gl, shadervars.vu_transform, node.get_global_transform());
-            gl_uniform_transform(gl, shadervars.vu_cameratransform, engine.camera.get_global_transform());
+            //gl_uniform_transform(gl, shadervars.vu_cameratransform, engine.camera.get_global_transform());
             //gl_uniform_mat4(gl, shadervars.vu_cameratransform, mat4_inverse(engine.camera.get_global_transform()));
+            gl_uniform_transform(gl, shadervars.vu_cameratransform, transform_inverse(engine.camera.get_global_transform()));
             gl_uniform_mat4(gl, shadervars.vu_projection, engine.camera.projection);
 
             // lighting
@@ -340,7 +343,7 @@ function engine_draw(engine, timestamp) {
                 node.material.specular.g,
                 node.material.specular.b,
             ]);
-            gl.uniform1f(shadervars.fu_materialreflectivity, 4.0); // TODO: get from material
+            gl.uniform1f(shadervars.fu_materialreflectivity, 8.0); // TODO: get from material
             let cameraposition = transform_getposition(engine.camera.get_global_transform());
             gl.uniform3fv(shadervars.fu_cameraposition, [
                 cameraposition.x,
