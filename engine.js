@@ -20,6 +20,7 @@ function engine_new(htmlid_canvas, htmlid_vshader, htmlid_fshader) {
         fu_materialambient:      gl.getUniformLocation(program, "fu_materialambient"),
         fu_materialdiffuse:      gl.getUniformLocation(program, "fu_materialdiffuse"),
         fu_materialspecular:     gl.getUniformLocation(program, "fu_materialspecular"),
+        fu_materialemission:     gl.getUniformLocation(program, "fu_materialemission"),
         fu_materialreflectivity: gl.getUniformLocation(program, "fu_materialreflectivity"),
 
         fu_cameraposition:       gl.getUniformLocation(program, "fu_cameraposition"),
@@ -83,6 +84,7 @@ function engine_run(engine) {
         if (global_keys.has("R")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), -turnspeed);
         }
+        /*
         if (global_keys.has(" ")) {
             if (global_keys.has("Shift")) {
                 node.transform = transform_translate(node.transform, vec3_new(0, 100 * delta, 0));
@@ -90,6 +92,7 @@ function engine_run(engine) {
                 node.transform = transform_translate(node.transform, vec3_new(0, -100 * delta, 0));
             }
         }
+        */
     });
     engine.nodes.push(camera);
     engine.camera = camera;
@@ -101,6 +104,7 @@ function engine_run(engine) {
                 color_new(0.0, 0.0, 0.0, 1.0),
                 color_new(0.0, 0.0, 0.0, 1.0),
                 color_new(0.0, 0.0, 0.0, 1.0),
+                color_new(0.0, 0.0, 0.0, 0.0),
             ), (node, delta) => {})
     ));
     engine.nodes.push(engine.camera.add_child(
@@ -109,6 +113,7 @@ function engine_run(engine) {
                 color_new(1.0, 1.0, 1.0, 1.0),
                 color_new(1.0, 1.0, 1.0, 1.0),
                 color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(0.0, 0.0, 0.0, 0.0),
             ), (node, delta) => {})
     ));
     */
@@ -123,6 +128,7 @@ function engine_run(engine) {
                 col,
                 color_new(1.0, 1.0, 1.0, 1.0),
                 color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(0.0, 0.0, 0.0, 0.0),
             ), (node, delta) => {
                 //node.transform = transform_translate(node.transform, vec3_new(0, Math.sin(engine.time) * delta, 0));
                 //node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0.5, 0.5), Math.PI * 0.5 * delta);
@@ -131,7 +137,6 @@ function engine_run(engine) {
         }
     }
 
-    /*
     // make pillars
     let pillar = (position) => {
         for (let i = 0; i < 10; i++) {
@@ -147,6 +152,7 @@ function engine_run(engine) {
                     color_new(1.0, 0.5 + (i/20), 1.0, 1.0),
                     color_new(1.0, 1.0, 1.0, 1.0),
                     color_new(1.0, 1.0, 1.0, 1.0),
+                    color_new(0.0, 0.0, 0.0, 0.0),
                 ),
                 (node, delta) => {}
             );
@@ -159,7 +165,6 @@ function engine_run(engine) {
         let z = Math.cos(i) * 300;
         pillar(vec3_new(x, 0, z));
     }
-    */
 
     // make orrery
     let sun = new SphereMesh(
@@ -169,20 +174,54 @@ function engine_run(engine) {
         8,
         16,
         material_new(
-            //color_new(1.0, 0.7, 0.5, 1.0),
+            color_new(1.0, 0.7, 0.5, 1.0),
+            //color_new(1.0, 1.0, 1.0, 1.0),
             color_new(1.0, 1.0, 1.0, 1.0),
             color_new(1.0, 1.0, 1.0, 1.0),
-            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(1.0, 0.7, 0.5, 1.0),
         ),
         (node, delta) => {
             let new_y = Math.sin(engine.time * 2) * 10;
             let delta_y = new_y - node._y;
             node.transform = transform_translate(node.transform, vec3_new(0, delta_y, 0));
             node._y = new_y;
+
+            let movement = vec3_new(0, 0, 0);
+            let speed = 100;
+            if (global_keys.has("a")) {
+                movement.x -= 1;
+            }
+            if (global_keys.has("d")) {
+                movement.x += 1;
+            }
+            if (global_keys.has("w")) {
+                movement.z -= 1;
+            }
+            if (global_keys.has("s")) {
+                movement.z += 1;
+            }
+            if (global_keys.has(" ")) {
+                movement.y += 1;
+            }
+            if (global_keys.has("Shift")) {
+                movement.y -= 1;
+            }
+            node.transform = transform_translate(node.transform, vec3_scale(movement, speed * delta));
         }
     );
     sun._y = 0;
     engine.nodes.push(sun);
+
+    let sunlight = new PointLight(transform_translate(transform_new(), vec3_new(0, 100, 0)),
+        material_new(
+            color_new(0.3, 0.3, 0.3, 1.0),
+            color_new(1.0, 0.0, 0.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(0.0, 0.0, 0.0, 1.0),
+        ), (node, delta) => {});
+    sun.add_child(sunlight);
+    engine.nodes.push(sunlight);
+
     // add planets
     for (let i = 0; i < 10; i++) {
         let planet = new SphereMesh(
@@ -195,6 +234,7 @@ function engine_run(engine) {
                 color_new(Math.random(), Math.random(), Math.random(), 1.0),
                 color_new(1.0, 1.0, 1.0, 1.0),
                 color_new(1.0, 1.0, 1.0, 1.0),
+                color_new(0.0, 0.0, 0.0, 0.0),
             ),
             (node, delta) => {
                 node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
@@ -217,6 +257,7 @@ function engine_run(engine) {
                     color_new(Math.random(), Math.random(), Math.random(), 1.0),
                     color_new(1.0, 1.0, 1.0, 1.0),
                     color_new(1.0, 1.0, 1.0, 1.0),
+                    color_new(0.0, 0.0, 0.0, 0.0),
                 ),
                 (node, delta) => {
                     node.transform = transform_rotate(node.transform, vec3_new(0, 1, 0), node._speed * delta);
@@ -229,11 +270,13 @@ function engine_run(engine) {
     }
 
     // add player
+    /*
     let player = new CubeMesh(engine.gl, vec3_new(50, 5, 0), vec3_new(10, 10, 10),
         material_new(
             color_new(0.0, 0.5, 0.8, 1.0),
             color_new(1.0, 1.0, 1.0, 1.0),
             color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(0.0, 0.0, 0.0, 0.0),
         ), (node, delta) => {
             let movement = vec3_new(0, 0, 0);
             let speed = 100;
@@ -254,13 +297,16 @@ function engine_run(engine) {
     );
     player.add_child(sun);
     engine.nodes.push(player);
+    */
 
     // add lighting
+    /*
     let light = new PointLight(transform_translate(transform_new(), vec3_new(0, 100, 0)),
         material_new(
             color_new(0.2, 0.2, 0.2, 1.0),
             color_new(1.0, 0.0, 0.0, 1.0),
             color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(0.0, 0.0, 0.0, 0.0),
         ), (node, delta) => {});
     engine.nodes.push(light);
     let lightshape = new SphereMesh(engine.gl, vec3_new(0, 0, 0), 5, 4, 8,
@@ -268,9 +314,11 @@ function engine_run(engine) {
             color_new(1.0, 0.0, 0.0, 0.0),
             color_new(1.0, 0.0, 0.0, 0.0),
             color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(0.0, 0.0, 0.0, 0.0),
         ), (node, delta) => {});
     engine.nodes.push(lightshape);
     light.add_child(lightshape);
+    */
 
     // start draw loop
     requestAnimationFrame((timestamp) => engine_draw(engine, timestamp));
@@ -342,6 +390,11 @@ function engine_draw(engine, timestamp) {
                 node.material.specular.r,
                 node.material.specular.g,
                 node.material.specular.b,
+            ]);
+            gl.uniform3fv(shadervars.fu_materialemission, [
+                node.material.emission.r,
+                node.material.emission.g,
+                node.material.emission.b,
             ]);
             gl.uniform1f(shadervars.fu_materialreflectivity, 8.0); // TODO: get from material
             let cameraposition = transform_getposition(engine.camera.get_global_transform());

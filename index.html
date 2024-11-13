@@ -59,6 +59,7 @@
             uniform vec3 fu_materialambient;
             uniform vec3 fu_materialdiffuse;
             uniform vec3 fu_materialspecular;
+            uniform vec3 fu_materialemission;
             uniform float fu_materialreflectivity;
 
             uniform vec3 fu_cameraposition;
@@ -89,6 +90,12 @@
                 illumination += specular;
                 illumination *= attenuation;
                 illumination += ambient;
+
+                if (length(fu_materialemission) > 0.0) {
+                    illumination = fu_materialemission; // emission is like ambient but it's not multiplied against the light
+                    // and there is no specular highlight or anything
+                }
+
                 gl_FragColor = vec4(illumination, 1.0);
             }
         </script>
