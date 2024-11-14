@@ -215,7 +215,7 @@ function engine_run(engine) {
     let sunlight = new PointLight(transform_translate(transform_new(), vec3_new(0, 100, 0)),
         material_new(
             color_new(0.3, 0.3, 0.3, 1.0),
-            color_new(1.0, 0.0, 0.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
             color_new(1.0, 1.0, 1.0, 1.0),
             color_new(0.0, 0.0, 0.0, 1.0),
         ), (node, delta) => {});
@@ -383,8 +383,6 @@ function engine_draw(engine, timestamp) {
             // other vars
             gl.uniform2fv(shadervars.vu_canvassize, [gl.canvas.width, gl.canvas.height]);
             gl_uniform_transform(gl, shadervars.vu_transform, node.get_global_transform());
-            //gl_uniform_transform(gl, shadervars.vu_cameratransform, engine.camera.get_global_transform());
-            //gl_uniform_mat4(gl, shadervars.vu_cameratransform, mat4_inverse(engine.camera.get_global_transform()));
             gl_uniform_transform(gl, shadervars.vu_cameratransform, transform_inverse(engine.camera.get_global_transform()));
             gl_uniform_mat4(gl, shadervars.vu_projection, engine.camera.projection);
 
@@ -457,14 +455,6 @@ function engine_draw(engine, timestamp) {
             //gl.drawArrays(gl.LINE_LOOP, 0, node.vbo_vertices_length / 3);
         }
     }
-
-    //gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    //gl.enableVertexAttribArray(shadervars.va_position);
-    //gl.vertexAttribPointer(shadervars.va_position, 2 /* x y */, gl.FLOAT, false, 0, 0);
-    //gl.uniform2fv(shadervars.vu_canvassize, [gl.canvas.width, gl.canvas.height]);
-    //gl_uniform_xform(gl, shadervars.vu_xform, xform);
-    //gl.uniform4fv(shadervars.fu_color, [color.r, color.g, color.b, color.a]);
-    //gl.drawArrays(gl.TRIANGLES, 0, 3 /* 1 triangle */);
 
     // draw again
     requestAnimationFrame((timestamp) => engine_draw(engine, timestamp));
