@@ -50,7 +50,7 @@ function engine_run(engine) {
     let aspect = engine.gl.canvas.clientWidth / engine.gl.canvas.clientHeight;
     //let camera = new Camera(transform_translate(transform_new(), vec3_new(0, 100, 0)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
     let camera = new Camera(
-        transform_translate(transform_new(), vec3_new(0, 100, 100)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
+        transform_translate(transform_new(), vec3_new(0, 100, 120)), Math.PI * 0.5, aspect, 1, 2000, (node, delta) => {
         // basic camera animation
         // this works somehow
         /*
@@ -128,9 +128,10 @@ function engine_run(engine) {
             //let col = color_new(x*0.75+0.25, 0.0, z*0.75+0.25, 1.0);
             let col = color_new(x*0.75+0.25, 1.0, 1.0 - z*0.75+0.25, 1.0);
             let mat = material_new(
-                col,
-                color_new(1.0, 1.0, 1.0, 1.0),
-                color_new(1.0, 1.0, 1.0, 1.0),
+                //col,
+                color_new(0.0, 0.0, 0.0, 1.0),
+                color_new(0.1, 0.1, 0.1, 1.0),
+                color_new(1.0, 0.6, 1.0, 1.0),
                 color_new(0.0, 0.0, 0.0, 0.0),
                 128.0,
             );
@@ -205,7 +206,7 @@ function engine_run(engine) {
     // make orrery
     let sun = new SphereMesh(
         engine.gl,
-        vec3_new(0, 100, 0),
+        vec3_new(0, 50, 0),
         20,
         8,
         16,
@@ -355,7 +356,7 @@ function engine_run(engine) {
             node.transform = transform_rotate(
                 node.transform,
                 vec3_new(0, 1, 0),
-                delta * Math.PI * 2 * 0.5
+                delta * Math.PI * 2 * -0.5
             );
         }
     );
@@ -407,7 +408,8 @@ function engine_draw(engine, timestamp) {
                 if (node2 instanceof PointLight) {
                     distance = vec3_length(
                         transform_getposition(node2.get_global_transform()),
-                        node.position
+                        //node.position
+                        transform_getposition(node.get_global_transform())
                     );
                     if (light == null || distance < lightdistance) {
                         light = node2;
