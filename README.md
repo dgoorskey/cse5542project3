@@ -9,8 +9,7 @@
 ## extras
 - emission
 - attenuation
+- worldspace lighting calculations
 
 ## limitations
-- i did all the lighting in worldspace
-- i couldn't figure out how to get the normals to transform to worldspace, so the lighting doesn't account for rotation (e.g. planets) and scale (e.g. blahaj shark)
 - i didn't actually write a model loader, i just pasted the json into `model.js`

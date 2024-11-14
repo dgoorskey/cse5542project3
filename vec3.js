@@ -10,3 +10,7 @@ function vec3_length(vec3) {
     return Math.sqrt(vec3.x*vec3.x, vec3.y*vec3.y, vec3.z*vec3.z);
 }
 
+function vec3_addvec3(a, b) {
+    return vec3_new(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
