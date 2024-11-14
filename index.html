@@ -44,7 +44,7 @@
 
                 gl_Position = pos;
                 fv_position = worldposition.xyz;
-                fv_normal = va_normal;
+                fv_normal = mat3(vu_transform) * va_normal; // see https://webglfundamentals.org/webgl/lessons/webgl-3d-lighting-directional.html
             }
         </script>
         <script id="fragmentshader" type="x-shader/x-fragment" src="fshader.glsl">
