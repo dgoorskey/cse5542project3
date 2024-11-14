@@ -100,6 +100,7 @@
         <script>
             let global_keys = new Set(); // set of pressed keys
             document.addEventListener('keydown', (e) => {
+                console.log(e.key);
                 global_keys.add(e.key);
             });
             document.addEventListener('keyup', (e) => {

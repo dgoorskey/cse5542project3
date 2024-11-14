@@ -66,22 +66,22 @@ function engine_run(engine) {
         */
 
         let turnspeed = Math.PI * 0.1 * delta;
-        if (global_keys.has("p")) {
+        if (global_keys.has("ArrowUp")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(1, 0, 0), turnspeed);
         }
-        if (global_keys.has("P")) {
+        if (global_keys.has("ArrowDown")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(1, 0, 0), -turnspeed);
         }
-        if (global_keys.has("y")) {
+        if (global_keys.has("ArrowLeft")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, 1, 0), turnspeed);
         }
-        if (global_keys.has("Y")) {
+        if (global_keys.has("ArrowRight")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, 1, 0), -turnspeed);
         }
-        if (global_keys.has("r")) {
+        if (global_keys.has(",")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), turnspeed);
         }
-        if (global_keys.has("R")) {
+        if (global_keys.has(".")) {
             node.transform = transform_rotatelocal(node.transform, vec3_new(0, 0, 1), -turnspeed);
         }
         /*
