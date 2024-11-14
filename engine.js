@@ -320,6 +320,34 @@ function engine_run(engine) {
     light.add_child(lightshape);
     */
 
+    // add blahaj
+    let blahaj = new Mesh(
+        engine.gl,
+        transform_translate(
+            transform_scale(
+                transform_new(),
+                vec3_new(20, 20, 20)
+            ),
+            vec3_new(0, 100, 0)
+        ),
+        model_vertices(),
+        model_normals(),
+        material_new(
+            color_new(147/255, 228/255, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(1.0, 1.0, 1.0, 1.0),
+            color_new(0.0, 0.0, 0.0, 0.0),
+        ),
+        (node, delta) => {
+            node.transform = transform_rotate(
+                node.transform,
+                vec3_new(0, 1, 0),
+                delta * Math.PI * 2 * 0.5
+            );
+        }
+    );
+    engine.nodes.push(blahaj);
+
     // start draw loop
     requestAnimationFrame((timestamp) => engine_draw(engine, timestamp));
 }
